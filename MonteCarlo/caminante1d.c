@@ -33,14 +33,15 @@ rep - número de repeticiones (caminantes) */
 float prob_origin(int n, int rep){
     int cont=0;
     int x = 0;
-    for (int k=0;k<=rep;k++){
-        for (int i = 0; i <= n; i++){
+    for (int k=1;k<=rep;k++){
+        for (int i = 1; i <= n; i++){
             x += dx1d();
             if (x==0){
                 cont++;
                 break;
             }
         }
+        //cont++;
     }
     return (float)cont/rep;
 }
@@ -51,6 +52,9 @@ int main(){
     int p;
     int rep=1;
     float prob;
+
+    FILE *archivo = fopen("../Notebooks_Py/Datos/caminante1d.csv", "w"); 
+    fprintf(archivo,"rep,prob\n");
 
     printf("Número de pasos por caminante:");
     scanf("%d", &n);printf("\n");
@@ -63,8 +67,10 @@ int main(){
         rep *= 10;
         prob = prob_origin(n, rep);
         printf("Número de repeticiones (caminantes): %d, Probabilidad de regresar al origen: %f\n", rep, prob);
+        fprintf(archivo, "%d,%f\n", rep, prob);
     }
 
+    fclose(archivo);
 
     return 0;
 }
