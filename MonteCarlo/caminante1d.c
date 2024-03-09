@@ -33,15 +33,14 @@ rep - número de repeticiones (caminantes) */
 float prob_origin(int n, int rep){
     int cont=0;
     int x = 0;
-    for (int k=1;k<=rep;k++){
-        for (int i = 1; i <= n; i++){
+    for (int k=0;k<rep;k++){
+        for (int i = 0; i < n; i++){
             x += dx1d();
             if (x==0){
                 cont++;
                 break;
             }
         }
-        //cont++;
     }
     return (float)cont/rep;
 }
