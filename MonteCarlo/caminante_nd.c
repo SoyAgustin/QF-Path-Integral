@@ -9,15 +9,12 @@ float randnum(float min, float max) {
     return num;
 }
 
-/*El caminante aleatorio puede avanzar solo en 2 direcciones, adelante o hacia atrás
-para esto, con el generador de numeros aleatorios de entre 0 y 1 se puede dividir
-el intervalo en 2, cuando se obtiene un número menor o igual al primer intervalo
-el caminante avanza hacia atrás y en caso contrario avanza hacia la derecha*/
+int randnum_int(int min,int max){
+    int num = roundf(randnum(min,max));
+    return num;
+}
 
 int dx1d(){
-    int dim = 1;
-    int posibilities = 2*dim;
-
     float num = randnum(0,1);
     if (num <= 0.5){
         return -1;
@@ -27,16 +24,31 @@ int dx1d(){
     }
 }
 
+int is_origin(int dim,int array[]){
+    for(int i=0;i<dim;i++){
+        if(array[i]!=0){
+            return 0;
+        }
+    }
+    return 1;
+}
+
 /*
+dim - dimensión
+x - vector de posición (array[dim])
 n - número de pasos
 rep - número de repeticiones (caminantes) */
-float prob_origin(int n, int rep){
+
+float prob_origin(int dim, int x[],int n, int rep){
     int cont=0;
-    int x = 0;
+    int dir;
+
     for (int k=0;k<rep;k++){
-        for (int i = 0; i < n; i++){
-            x += dx1d();
-            if (x==0){
+        for (int i = 0; i<n; i++){
+            dir = randnum(1,dim);
+            x[dir] += dx1d();
+
+            if (is_origin(dim,x)==1){
                 cont++;
                 break;
             }
@@ -45,31 +57,33 @@ float prob_origin(int n, int rep){
     return (float)cont/rep;
 }
 
+
 int main(){
     srand(time(NULL));
+
+    int dim=2;//dim y x[] misma dimension
+    int x[2]={0};
+    int p=5;
+
     int n;
-    int p;
+    
     int rep=1;
     float prob;
 
-    FILE *archivo = fopen("../Notebooks_Py/Datos/caminante1d.csv", "w"); 
-    fprintf(archivo,"rep,prob\n");
+    //FILE *archivo = fopen("../Notebooks_Py/Datos/caminante1d.csv", "w"); 
+    //fprintf(archivo,"rep,prob\n");
 
     printf("Número máximo de pasos por caminante:");
     scanf("%d", &n);printf("\n");
-    p=5;
-    /*
-    printf("Potencia de 10 para el número de repeticiones (caminantes):");
-    scanf("%d", &p);printf("\n");*/
-
+    
     for(int i=0;i<=p;i++){
         rep *= 10;
-        prob = prob_origin(n, rep);
+        prob = prob_origin(dim,x,n, rep);
         printf("Número de repeticiones (caminantes): %d, Probabilidad de regresar al origen: %f\n", rep, prob);
-        fprintf(archivo, "%d,%f\n", rep, prob);
+        //fprintf(archivo, "%d,%f\n", rep, prob);
     }
 
-    fclose(archivo);
-
+    //fclose(archivo);
+    
     return 0;
 }
