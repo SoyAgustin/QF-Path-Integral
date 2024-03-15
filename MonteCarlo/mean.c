@@ -55,11 +55,11 @@ double mean(int N,double x[]){
 
 double var(int N, double x[]){
     double mean_x=mean(N,x);
-    double sum_x2=0.0;
+    double sum_x2=0;
     for(int i=0;i<N;i++){
         sum_x2+=x[i]*x[i];
     } 
-    return (double) (sum_x2-N*(mean_x*mean_x))/(N-1);
+    return  (double)(sum_x2-N*(mean_x*mean_x))/(N-1);
 }
 
 double error(int N, double x[]){
@@ -67,33 +67,24 @@ double error(int N, double x[]){
 }
 
 int main(){
-    srand(time(NULL));
-    
-    int n_max=1;
-    int cam=10;
-    int pow=5;
-    int rep = 100;
-    double prob[100];
-    double prob_mean;
+    double valores[100];
+    int row=0;
+    double promedio;
+    double varianza;
     double err;
 
-    FILE *archivo = fopen("../Notebooks_Py/Datos/caminante1d.csv", "w"); 
-    fprintf(archivo,"n_max,caminantes,prob,error\n");
-    
+    FILE *file = fopen("/home/agustin/Escritorio/Servicio/Notebooks_Py/Datos/randomnumbers.csv", "r");
 
-    for(int i=0;i<pow;i++){
-        n_max*= 10;
-        for(int k=0;k<100;k++){
-            prob[k]= prob_origin(n_max, cam);
-            
-        }
-        prob_mean= mean(rep,prob);
-        err = error(rep,prob);
-        printf("n_max: %d, rep: %d, prob_mean: %lf, error: %lf\n",n_max,rep,prob_mean,err);
-        fprintf(archivo, "%d,%d,%lf,%lf\n", n_max,rep,prob_mean,err);
+    char line[1024];
+    while (fgets(line, 1024, file)) {
+        valores[row++] = atof(line);
     }
 
-    fclose(archivo);
-    
+    fclose(file);
+
+    promedio=mean(100,valores);
+    varianza =var(100,valores);
+    err = error(100,valores);
+    printf("mean: %f\n var: %f\n err: %f\n",promedio,varianza,err);
     return 0;
 }
