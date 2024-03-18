@@ -72,8 +72,8 @@ int main(){
     int n_max=1;
     int cam=10;
     int pow=5;
-    int rep = 100;
-    double prob[100];
+    int rep = 1000;
+    double prob[1000];
     double prob_mean;
     double err;
 
@@ -83,7 +83,7 @@ int main(){
 
     for(int i=0;i<pow;i++){
         n_max*= 10;
-        for(int k=0;k<100;k++){
+        for(int k=0;k<rep;k++){
             prob[k]= prob_origin(n_max, cam);
             
         }
