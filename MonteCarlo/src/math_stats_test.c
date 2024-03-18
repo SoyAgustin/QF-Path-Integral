@@ -23,6 +23,6 @@ int main(){
     promedio=mean(100,valores);
     varianza =var(100,valores);
     err = error(100,valores);
-    printf("mean: %f\n var: %f\n err: %f\n",promedio,varianza,err);
+    printf("mean: %lf\n var: %lf\n err: %lf\n",promedio,varianza,err);
     return 0;
 }
