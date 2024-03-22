@@ -22,32 +22,51 @@ int dx1d(){
 cam - número de caminantes o random walkers (experimentos) */
 double prob_origin(int n, int cam){
     int cont=0;
-    int x = 0;
+
     for (int k=0;k<cam;k++){
+        int x = 0;
+        int y = 0;
+        printf("Experimento: %d\n",k);
         for (int i = 0; i < n; i++){
-            x += dx1d();
-            if (x==0){
+            int dx = dx1d(); 
+            if(dx==1){
+            x += dx;
+            printf("x+1 ");
+            }
+            else{
+                y += dx;
+                printf("y+1 ");
+            }
+            printf("i=%d (%d,%d)\n",i,x,y);
+            if (x==0 && y==0){
                 cont++;
                 break;
             }
         }
+        
     }
     return (double)cont/cam;
 }
 
 int main(){
     srand(time(NULL));
-    
-    int n_max=10;//maximo numero de pasos por experimento
+
+    int n_max=100;//maximo numero de pasos por experimento
     int pow=10;//n_max_final = n_max^pow
-    int cam=15;//numero de caminantes o experimentos
-    int rep = 1000;//numero de repeticiones por cada experimento
-    double prob[1000];//arreglo de probabilidades para cada n_max de pasos
+    int cam=10;//numero de caminantes o experimentos
+    int rep = 10;//numero de repeticiones por cada experimento
+    double prob;//arreglo de probabilidades para cada n_max de pasos
 
     double prob_mean;
     double err;
 
-    FILE *archivo = fopen("../../Notebooks_Py/Datos/caminante_1d.csv", "w"); 
+    prob = prob_origin(n_max,cam);
+    printf("prob: %lf\n",prob);
+
+
+    /*
+
+    FILE *archivo = fopen("../../Notebooks_Py/Datos/caminante_2d.csv", "w"); 
     fprintf(archivo,"n_max,caminantes,experimentos,prob,error\n");
     
 
@@ -64,6 +83,7 @@ int main(){
     }
 
     fclose(archivo);
+    */
     
     return 0;
 }
