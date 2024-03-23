@@ -19,11 +19,11 @@ int dx1d(){
 }
 
 /*n - número de pasos
-cam - número de caminantes o random walkers (experimentos) */
-double prob_origin(int n, int cam){
+exp - número de caminantes o random walkers (experimentos) */
+double prob_origin(int n, int exp){
     int cont=0;
-    int x = 0;
-    for (int k=0;k<cam;k++){
+    for (int k=0;k<exp;k++){
+        int x = 0;
         for (int i = 0; i < n; i++){
             x += dx1d();
             if (x==0){
@@ -32,15 +32,15 @@ double prob_origin(int n, int cam){
             }
         }
     }
-    return (double)cont/cam;
+    return (double)cont/exp;
 }
 
 int main(){
     srand(time(NULL));
     
-    int n_max=10;//maximo numero de pasos por experimento
-    int pow=10;//n_max_final = n_max^pow
-    int cam=15;//numero de caminantes o experimentos
+    int n_max=1;//maximo numero de pasos por experimento
+    int pow=10;//
+    int exp=15;//numero de caminantes o experimentos
     int rep = 1000;//numero de repeticiones por cada experimento
     double prob[1000];//arreglo de probabilidades para cada n_max de pasos
 
@@ -54,13 +54,13 @@ int main(){
     for(int i=0;i<pow;i++){
         n_max*= 2;
         for(int k=0;k<rep;k++){
-            prob[k]= prob_origin(n_max, cam);
+            prob[k]= prob_origin(n_max, exp);
             
         }
         prob_mean= mean(rep,prob);
         err = error(rep,prob);
-        printf("n_max: %d, rw:%d ,exp: %d, prob_mean: %lf, error: %lf\n",n_max,cam,rep,prob_mean,err);
-        fprintf(archivo, "%d,%d,%d,%lf,%lf\n", n_max,cam,rep,prob_mean,err);
+        printf("n_max: %d, rw:%d ,exp: %d, prob_mean: %lf, error: %lf\n",n_max,exp,rep,prob_mean,err);
+        fprintf(archivo, "%d,%d,%d,%lf,%lf\n", n_max,exp,rep,prob_mean,err);
     }
 
     fclose(archivo);
