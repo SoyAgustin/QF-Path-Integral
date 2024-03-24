@@ -70,7 +70,7 @@ int main(){
         prob_mean= mean(rep,prob);
         err = error(rep,prob);
         printf("n_max: %d, rw:%d ,exp: %d, prob_mean: %lf, error: %lf\n",n_max,exp,rep,prob_mean,err);
-        fprintf(archivo, "%d,%d,%d,%lf,%lf\n", n_max,exp,rep,prob_mean,err);
+        fprintf(archivo, "%d,%d,%d,%.15lf,%.15lf\n", n_max,exp,rep,prob_mean,err);
     }
 
     fclose(archivo);
