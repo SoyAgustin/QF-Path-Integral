@@ -16,7 +16,7 @@ int dx1d(){
 
 /*n - número de pasos
 exp - número de caminantes o random walkers (experimentos) */
-#define DIMENSION 3
+#define DIMENSION 4
 double prob_origin(int n, int exp){
     int cont=0;
 
@@ -42,9 +42,9 @@ int main(){
     srand(time(NULL));
 
     int n_max=1;//maximo numero de pasos por experimento
-    int pow=10;//
+    int pow=20;//
     int exp=15;//numero de caminantes o experimentos
-    int rep = 1000;//numero de repeticiones por cada experimento
+    int rep = 100;//numero de repeticiones por cada experimento
     double prob[1000];//arreglo de probabilidades para cada n_max de pasos
 
     double prob_mean;
