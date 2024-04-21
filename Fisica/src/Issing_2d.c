@@ -25,7 +25,7 @@ neighbor get_neighbors(int row, int col)
     }
 
     n.right = (col + 1);
-    if (n.right >= SIZE - 1)
+    if (n.right >= SIZE)
     {
         n.right = 0;
     }
@@ -37,7 +37,7 @@ neighbor get_neighbors(int row, int col)
     }
 
     n.down = (row + 1);
-    if (n.down >= SIZE - 1)
+    if (n.down >= SIZE)
     {
         n.down = 0;
     }
