@@ -6,91 +6,118 @@
 
 #define SIZE 4
 
-/*
-int sum_neighbors(int lattice[SIZE][SIZE], int row, int col) {
+typedef struct
+{
+    int up;
+    int down;
+    int left;
+    int right;
+} neighbor;
+
+neighbor get_neighbors(int row, int col)
+{
+    neighbor n;
+
+    n.left = (col - 1);
+    if (n.left < 0)
+    {
+        n.left = SIZE - 1;
+    }
+
+    n.right = (col + 1);
+    if (n.right >= SIZE - 1)
+    {
+        n.right = 0;
+    }
+
+    n.up = (row - 1);
+    if (n.up < 0)
+    {
+        n.up = SIZE - 1;
+    }
+
+    n.down = (row + 1);
+    if (n.down >= SIZE - 1)
+    {
+        n.down = 0;
+    }
+
+    return n;
+}
+
+int H_ij(int lattice[SIZE][SIZE], int row, int col)
+{
+    neighbor n = get_neighbors(row, col);
     int sum = 0;
-    
-    // Calcular los índices de los vecinos
-    int left = (col - 1 + SIZE) % SIZE;
-    int right = (col + 1) % SIZE;
-    int up = (row - 1 + SIZE) % SIZE;
-    int down = (row + 1) % SIZE;
-    
-    // Sumar los valores de los vecinos
-    sum += lattice[up][col]*lattice[row][col];
-    sum += lattice[down][col]*lattice[row][col];
-    sum += lattice[row][left]*lattice[row][col];
-    sum += lattice[row][right]*lattice[row][col];
-    
+
+    sum += lattice[n.up][col];
+    sum += lattice[n.down][col];
+    sum += lattice[row][n.left];
+    sum += lattice[row][n.right];
+
+    return lattice[row][col] * sum;
+}
+
+int H(int lattice[SIZE][SIZE])
+{
+    int sum = 0;
+    for (int i = 0; i < SIZE; i++)
+    {
+        for (int j = 0; j < SIZE; j++)
+        {
+            sum += H_ij(lattice, i, j);
+        }
+    }
     return sum;
 }
-*/
 
-int main(){
+int main()
+{
     srand(316032629);
 
-    int lattice[SIZE][SIZE]={0};
-    int cont =0;
-    for(int i=0;i<SIZE;i++){
-        for(int j=0;j<SIZE;j++){
+    int lattice[SIZE][SIZE] = {0};
+    int cont = 0;
+    for (int i = 0; i < SIZE; i++)
+    {
+        for (int j = 0; j < SIZE; j++)
+        {
             /*
-            int spin = randnum_int(-1,1);  
+            int spin = randnum_int(-1,1);
             while(spin == 0){
                 spin = randnum_int(-1,1);
             }
             */
-            lattice[i][j]=cont;
+            lattice[i][j] = cont;
             cont++;
         }
     }
-        int left,right,up,down;
-        for(int row=0;row<SIZE;row++){
-            for(int col=0;col<SIZE;col++){
 
-                left = (col - 1);
-                if (left < 0){
-                    left = SIZE-1;
-                    }
-                
+    neighbor n;
 
-                right = (col + 1);
-                if(right >= SIZE-1){
-                    right = 0;
-                }
+    for(int row=0;row<SIZE;row++){
+    for(int col=0;col<SIZE;col++){
 
-                up = (row -1);
-                if(up<0){
-                    up = SIZE-1;
-                }
-                
-                
-                down = (row + 1);
-                if(down >= SIZE-1){
-                    down = 0;
-                }
-            
+    n = get_neighbors(row,col);
 
-                
-                
-                printf("\t [%d,%d]: %d \t \n",up,col,lattice[up][col]);
-                printf("[%d,%d]: %d \t",row,left,lattice[row][left]);
-                printf("[%d,%d]: %d",row,col,lattice[row][col]);
-                printf("\t [%d,%d]: %d \n",row,right,lattice[row][right]);
-                printf("\t [%d,%d]: %d \t\n",down,col,lattice[down][col]);
-                
-               
-                
+    printf("\t [%d,%d]: %d \t \n", n.up, col, lattice[n.up][col]);
+    printf("[%d,%d]: %d \t", row, n.left, lattice[row][n.left]);
+    printf("[%d,%d]: %d", row, col, lattice[row][col]);
+    printf("\t [%d,%d]: %d \n", row, n.right, lattice[row][n.right]);
+    printf("\t [%d,%d]: %d \t\n", n.down, col, lattice[n.down][col]);
 
-                printf("\n");
-        }
+    printf("\n");
+
+    }
     }
 
-    for(int i=0;i<SIZE;i++){
-        for(int j=0;j<SIZE;j++){
-            printf("%d ",lattice[i][j]);
-        }
-        printf("\n");
+for (int i = 0; i < SIZE; i++)
+{
+    for (int j = 0; j < SIZE; j++)
+    {
+        printf("%d ", lattice[i][j]);
     }
+    printf("\n");
+}
 
-    return 0;
+return 0;
 }
