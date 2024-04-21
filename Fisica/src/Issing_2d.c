@@ -4,7 +4,7 @@
 #include <time.h>
 #include "../lib/my_math_stats.h"
 
-#define SIZE 8
+#define SIZE 3
 
 typedef struct{
     int up;
@@ -65,53 +65,90 @@ int H(int lattice[SIZE][SIZE]){
     return sum;
 }
 
-int main(){
-    srand(316032629);
+float p_accept(int dH,int T){
+    if(dH<=0){
+        return 1.0;
+    }else{
+        return exp(-dH/T);
+    }
+}
 
-    int lattice[SIZE][SIZE] = {0};
-    int h_ij,h_tot; 
-    
+void initialize_lattice(int lattice[SIZE][SIZE]){
     for (int i = 0; i < SIZE; i++){
         for (int j = 0; j < SIZE; j++){
-            /*
             int spin = randnum_int(-1,1);
             while(spin == 0){
                 spin = randnum_int(-1,1);
             }
-            */
-           lattice[i][j]=-1;
+           lattice[i][j]=spin;
         }
     }
-    
-
-    neighbor n;
-
-    for(int row=0;row<SIZE;row++){
-    for(int col=0;col<SIZE;col++){
-
-    n = get_neighbors(row,col);
-    h_ij = H_ij(lattice,row,col);
-
-    printf("H_ij: %d\n",h_ij);
-    printf("\t [%d,%d]: %d \t \n", n.up, col, lattice[n.up][col]);
-    printf("[%d,%d]: %d \t", row, n.left, lattice[row][n.left]);
-    printf("[%d,%d]: %d", row, col, lattice[row][col]);
-    printf("\t [%d,%d]: %d \n", row, n.right, lattice[row][n.right]);
-    printf("\t [%d,%d]: %d \t\n", n.down, col, lattice[n.down][col]);
-
-    printf("\n");
-
-    }
-    }
-
-h_tot=H(lattice);
-for (int i = 0; i < SIZE; i++){
-    for (int j = 0; j < SIZE; j++){
-        printf("%d ", lattice[i][j]);
-    }
-    printf("\n");
 }
-printf("H_tot: %d\n",h_tot);
 
+void print_lattice(int lattice[SIZE][SIZE]){
+    printf("\n");
+    for (int i = 0; i < SIZE; i++){
+        for (int j = 0; j < SIZE; j++){
+            printf("%d ", lattice[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void sweep(int lattice[SIZE][SIZE], int T){
+    int h0_ij,hs_ij,dH;
+    float p,rand;
+    for(int i=0;i<SIZE;i++){
+        for(int j=0;j<SIZE;j++){
+
+            h0_ij = H_ij(lattice,i,j);
+            printf("h0: %d\n",h0_ij);
+            printf("lattice[%d][%d]: %d\n",i,j,lattice[i][j]);
+
+            lattice[i][j] = -1*lattice[i][j];
+            hs_ij = H_ij(lattice,i,j);
+            printf("hs: %d\n",hs_ij);
+
+            dH = hs_ij - h0_ij;
+            printf("dH:%d\n",dH);
+
+            p = p_accept(dH,T);
+            printf("p:%f\n",p);
+            if (p!=1.0){
+                rand = randnum(0,1);
+                printf("rand:%f\n",rand);
+                if (rand > p){
+                    lattice[i][j] = -1*lattice[i][j];
+                }
+            }
+            printf("lattice[%d][%d]: %d\n\n",i,j,lattice[i][j]);
+        }
+    }
+}
+
+int main(){
+    srand(316032629);
+
+    int lattice[SIZE][SIZE] = {0};
+    int T=3;
+    initialize_lattice(lattice);
+    print_lattice(lattice);
+
+    /*
+    int H0 = H(lattice);
+    print_lattice(lattice);
+    printf("H0 = %d\n", H0);
+
+    int Hn;
+    for(int i=0;i<10;i++){
+        sweep(lattice, T);
+        Hn = H(lattice);
+        print_lattice(lattice);
+        printf("H%d = %d\n", i+1,Hn);
+    }
+    */
+
+   sweep(lattice, T);
+    
 return 0;
 }
