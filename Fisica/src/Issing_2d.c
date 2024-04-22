@@ -102,26 +102,24 @@ void sweep(int lattice[SIZE][SIZE], int T){
         for(int j=0;j<SIZE;j++){
 
             h0_ij = H_ij(lattice,i,j);
-            printf("h0: %d\n",h0_ij);
-            printf("lattice[%d][%d]: %d\n",i,j,lattice[i][j]);
+            //printf("h0: %d\n",h0_ij);
+            //printf("lattice[%d][%d]: %d\n",i,j,lattice[i][j]);
 
             lattice[i][j] = -1*lattice[i][j];
             hs_ij = H_ij(lattice,i,j);
-            printf("hs: %d\n",hs_ij);
+            //printf("hs: %d\n",hs_ij);
 
             dH = hs_ij - h0_ij;
-            printf("dH:%d\n",dH);
+            //printf("dH:%d\n",dH);
 
             p = p_accept(dH,T);
-            printf("p:%f\n",p);
-            if (p!=1.0){
-                rand = randnum(0,1);
-                printf("rand:%f\n",rand);
-                if (rand > p){
-                    lattice[i][j] = -1*lattice[i][j];
-                }
+            rand = randnum(0,1);
+            //printf("p:%f\n",p);
+            //printf("rand:%f\n",rand);
+            if (p!=1.0 && rand > p){
+                lattice[i][j] = -1*lattice[i][j];
             }
-            printf("lattice[%d][%d]: %d\n\n",i,j,lattice[i][j]);
+            //printf("lattice[%d][%d]: %d\n\n",i,j,lattice[i][j]);
         }
     }
 }
@@ -130,25 +128,15 @@ int main(){
     srand(316032629);
 
     int lattice[SIZE][SIZE] = {0};
-    int T=3;
+    int T=4;
     initialize_lattice(lattice);
     print_lattice(lattice);
+    printf("%d\n",H(lattice));
 
-    /*
-    int H0 = H(lattice);
+   for(int i=0;i<50;i++){
+    sweep(lattice, T);
     print_lattice(lattice);
-    printf("H0 = %d\n", H0);
-
-    int Hn;
-    for(int i=0;i<10;i++){
-        sweep(lattice, T);
-        Hn = H(lattice);
-        print_lattice(lattice);
-        printf("H%d = %d\n", i+1,Hn);
-    }
-    */
-
-   sweep(lattice, T);
-    
+    printf("%d\n",H(lattice));
+   }
 return 0;
 }
