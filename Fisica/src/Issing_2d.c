@@ -4,7 +4,7 @@
 #include <time.h>
 #include "../lib/my_math_stats.h"
 
-#define SIZE 3
+#define SIZE 4
 
 typedef struct{
     int up;
@@ -47,9 +47,9 @@ int H_ij(int lattice[SIZE][SIZE], int row, int col){
     neighbor n = get_neighbors(row, col);
     int sum = 0;
 
-    sum += lattice[n.up][col];
+    //sum += lattice[n.up][col];
     sum += lattice[n.down][col];
-    sum += lattice[row][n.left];
+    //sum += lattice[row][n.left];
     sum += lattice[row][n.right];
 
     return -1*lattice[row][col] * sum;
@@ -59,7 +59,7 @@ int H(int lattice[SIZE][SIZE]){
     int sum = 0;
     for (int i = 0; i < SIZE; i++){
         for (int j = 0; j < SIZE; j++){
-            sum += H_ij(lattice, i, j);
+            sum += H_ij(lattice,i,j);
         }
     }
     return sum;
@@ -93,6 +93,7 @@ void print_lattice(int lattice[SIZE][SIZE]){
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 void sweep(int lattice[SIZE][SIZE], int T){
@@ -127,16 +128,13 @@ void sweep(int lattice[SIZE][SIZE], int T){
 int main(){
     srand(316032629);
 
-    int lattice[SIZE][SIZE] = {0};
-    int T=4;
-    initialize_lattice(lattice);
+    //int lattice[SIZE][SIZE] = {{1,-1,1,-1},{-1,1,-1,1},{1,-1,1,-1},{-1,1,-1,1}};
+    //int lattice[SIZE][SIZE] = {{1,1,1,1},{1,1,1,1},{1,1,1,1},{1,1,1,1}};
+    int lattice[SIZE][SIZE] = {{-1,-1,-1,-1},{-1,-1,-1,-1},{-1,-1,-1,-1},{-1,-1,-1,-1}};
+    
     print_lattice(lattice);
-    printf("%d\n",H(lattice));
+    printf("H: %d\n",H(lattice));
 
-   for(int i=0;i<50;i++){
-    sweep(lattice, T);
-    print_lattice(lattice);
-    printf("%d\n",H(lattice));
-   }
+   
 return 0;
 }
