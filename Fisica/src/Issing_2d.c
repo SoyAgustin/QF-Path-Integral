@@ -126,11 +126,11 @@ void init_simulation(int start, int max_sweeps, float T){
     int H_tot;
     char ruta[50];
     if(start == 0){
-        sprintf(ruta,"../../Notebooks_Py/Datos/issing_2d_cold.csv");
+        sprintf(ruta,"../../Notebooks_Py/Datos/issing_2d_cold_t25.csv");
         init_paralel_lattice(lattice,1);
     }else{
     initialize_lattice(lattice);
-    sprintf(ruta,"../../Notebooks_Py/Datos/issing_2d_hot.csv");
+    sprintf(ruta,"../../Notebooks_Py/Datos/issing_2d_hot_t25.csv");
     }
     FILE *archivo = fopen(ruta, "w"); 
 
@@ -150,8 +150,8 @@ void init_simulation(int start, int max_sweeps, float T){
 int main(){
     srand(time(NULL));
 
-    int max_sweeps = 200;
-    float T=4;
+    int max_sweeps = 5000;
+    float T=2.5;
     //0 cold-start, 1 hot-start
     init_simulation(0,max_sweeps,T);
     init_simulation(1,max_sweeps,T);
