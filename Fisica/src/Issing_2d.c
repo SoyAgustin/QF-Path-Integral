@@ -4,7 +4,7 @@
 #include <time.h>
 #include "../lib/my_math_stats.h"
 
-#define SIZE 8
+#define SIZE 24
 
 typedef struct{
     int down;
@@ -124,13 +124,13 @@ void init_simulation(int start, int max_sweeps, float T){
     
     int lattice[SIZE][SIZE];
     int H_tot;
-    char ruta[50];
+    char ruta[500];
     if(start == 0){
-        sprintf(ruta,"../../Notebooks_Py/Datos/issing_2d_cold_t25.csv");
+        sprintf(ruta,"../../Notebooks_Py/Datos/Issing/issing_2d_cold_t%.1f_%d.csv",T,SIZE);
         init_paralel_lattice(lattice,1);
     }else{
     initialize_lattice(lattice);
-    sprintf(ruta,"../../Notebooks_Py/Datos/issing_2d_hot_t25.csv");
+    sprintf(ruta,"../../Notebooks_Py/Datos/Issing/issing_2d_hot_t%.1f_%d.csv",T,SIZE);
     }
     FILE *archivo = fopen(ruta, "w"); 
 
@@ -151,7 +151,7 @@ int main(){
     srand(time(NULL));
 
     int max_sweeps = 5000;
-    float T=2.5;
+    float T=3.9;
     //0 cold-start, 1 hot-start
     init_simulation(0,max_sweeps,T);
     init_simulation(1,max_sweeps,T);
