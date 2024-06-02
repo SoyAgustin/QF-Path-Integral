@@ -65,6 +65,16 @@ int H(int lattice[SIZE][SIZE]){
     return sum/2;
 }
 
+int M(int lattice[SIZE][SIZE]){
+    int sum=0;
+    for (int i = 0; i < SIZE; i++){
+        for (int j = 0; j < SIZE; j++){
+            sum += lattice[i][j];
+        }
+    }
+    return sum;
+}
+
 void initialize_lattice(int lattice[SIZE][SIZE]){
     for (int i = 0; i < SIZE; i++){
         for (int j = 0; j < SIZE; j++){
@@ -120,10 +130,11 @@ void sweep(int lattice[SIZE][SIZE], float T){
     }
 }
 
+
 void init_simulation(int start, int max_sweeps, float T){
     
     int lattice[SIZE][SIZE];
-    int H_tot;
+    int H_tot,mag;
     char ruta[500];
     if(start == 0){
         sprintf(ruta,"../../Notebooks_Py/Datos/Issing/issing_2d_cold_t%.1f_%d.csv",T,SIZE);
@@ -132,16 +143,18 @@ void init_simulation(int start, int max_sweeps, float T){
     initialize_lattice(lattice);
     sprintf(ruta,"../../Notebooks_Py/Datos/Issing/issing_2d_hot_t%.1f_%d.csv",T,SIZE);
     }
-    FILE *archivo = fopen(ruta, "w"); 
+    FILE *archivo = fopen(ruta, "w");
 
-    fprintf(archivo,"sweep,H,L,T\n");
+    fprintf(archivo,"sweep,H,M,absM,L,T\n");
     H_tot = H(lattice); 
-    fprintf(archivo, "%d,%d,%d,%.3f\n",0,H_tot,SIZE,T);
+    mag = M(lattice);
+    fprintf(archivo, "%d,%d,%d,%d,%.3f\n",0,H_tot,mag,SIZE,T);
 
     for(int i =1;i<max_sweeps;i++){
         sweep(lattice,T);
-        H_tot = H(lattice); 
-        fprintf(archivo, "%d,%d,0,0\n", i,H_tot);
+        H_tot = H(lattice);
+        mag = M(lattice);
+        fprintf(archivo, "%d,%d,%d,0,0\n", i,H_tot,mag);
     }
 
     fclose(archivo);
@@ -150,12 +163,13 @@ void init_simulation(int start, int max_sweeps, float T){
 int main(){
     srand(time(NULL));
 
-    int max_sweeps = 5000;
-    float T=3.9;
-    //0 cold-start, 1 hot-start
-    init_simulation(0,max_sweeps,T);
-    init_simulation(1,max_sweeps,T);
-    printf("Listo :)\n");
+    int max_sweeps = 10000;
     
+    for(float T=1.5;T<=3.8;T=T+0.1){
+        init_simulation(0,max_sweeps,T);
+        init_simulation(1,max_sweeps,T);
+        printf("T=%.1f\n",T);
+    }
+    printf("Listo :) , L=%d\n",SIZE);
 return 0;
 }
