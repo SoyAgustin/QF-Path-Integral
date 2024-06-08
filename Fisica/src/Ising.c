@@ -159,15 +159,15 @@ void init_simulation(int start, int max_sweeps, float T){
 
 //Rutas, archivos e inicialización hot y cold
     if(start == 0){
-        sprintf(ruta,"../../Notebooks_Py/Datos/Issing/issing_2d_cold_t%.1f_%d.csv",T,SIZE);
+        sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_cold_t%.1f_%d.csv",T,SIZE);
         init_paralel_lattice(lattice,1);
     }else{
     initialize_lattice(lattice);
-    sprintf(ruta,"../../Notebooks_Py/Datos/Issing/issing_2d_hot_t%.1f_%d.csv",T,SIZE);
+    sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_hot_t%.1f_%d.csv",T,SIZE);
     }
 
 //ruta y apertura de los archivos 
-    sprintf(ruta_corr,"../../Notebooks_Py/Datos/Issing/ising_2d_corr_t%.1f_%d.csv",T,SIZE);
+    sprintf(ruta_corr,"../../Notebooks_Py/Datos/Ising/ising_2d_corr_t%.1f_%d.csv",T,SIZE);
     FILE *archivocorr = fopen(ruta_corr,"w");
     FILE *archivo = fopen(ruta, "w");
 
