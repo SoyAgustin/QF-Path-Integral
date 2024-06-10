@@ -225,8 +225,9 @@ void corr_test(){
 }
 
 int main(){
-    srand(time(NULL));
+    srand(316032629);
 
+/*
     int max_sweeps = 10000;
     
     for(float T=1.5;T<=3.8;T=T+0.1){
@@ -235,6 +236,8 @@ int main(){
         printf("T=%.1f\n",T);
     }
     printf("Listo :) , L=%d\n",SIZE);
+*/
+    corr_test();
 
 return 0;
 }
