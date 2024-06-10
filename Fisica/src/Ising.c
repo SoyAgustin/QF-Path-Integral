@@ -4,7 +4,7 @@
 #include <time.h>
 #include "../lib/my_math_stats.h"
 
-#define SIZE 12
+#define SIZE 8
 
 typedef struct{
     int down;
@@ -148,7 +148,6 @@ void sweep(int lattice[SIZE][SIZE], float T){
     }
 }
 
-
 void init_simulation(int start, int max_sweeps, float T){
     
     int lattice[SIZE][SIZE];
@@ -231,7 +230,7 @@ int main(){
     int max_sweeps = 10000;
     
     for(float T=1.5;T<=3.8;T=T+0.1){
-        init_simulation(0,max_sweeps,T);
+        //init_simulation(0,max_sweeps,T);
         init_simulation(1,max_sweeps,T);
         printf("T=%.1f\n",T);
     }
