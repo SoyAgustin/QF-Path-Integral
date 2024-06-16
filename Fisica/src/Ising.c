@@ -4,7 +4,7 @@
 #include <time.h>
 #include "../lib/my_math_stats.h"
 
-#define SIZE 8
+#define SIZE 128
 
 typedef struct{
     int down;
@@ -84,13 +84,7 @@ float sigma_j(int lattice[SIZE][SIZE],int j){
 }
 
 float corr_d(int lattice[SIZE][SIZE],int d){
-    float sum = 0;
-    float sigma_0 = sigma_j(lattice,0);
-    
-    for(int j=0;j<d;j++){
-        sum+=sigma_j(lattice,j);
-    }
-    return (sigma_0*sum)/(d+1);
+    return sigma_j(lattice,0)*sigma_j(lattice,d);
 }
 
 void initialize_lattice(int lattice[SIZE][SIZE]){
@@ -158,11 +152,19 @@ void init_simulation(int start, int max_sweeps, float T){
 
 //Rutas, archivos e inicialización hot y cold
     if(start == 0){
-        sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_cold_t%.1f_%d.csv",T,SIZE);
+        if(T>=2.13 && T<=2.37){
+            sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_cold_t%.2f_%d.csv",T,SIZE);
+        }else{
+            sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_cold_t%.1f_%d.csv",T,SIZE);
+        }
         init_paralel_lattice(lattice,1);
     }else{
     initialize_lattice(lattice);
-    sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_hot_t%.1f_%d.csv",T,SIZE);
+        if(T>=2.13 && T<=2.37){
+            sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_hot_t%.2f_%d.csv",T,SIZE);
+        }else{
+            sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_hot_t%.2f_%d.csv",T,SIZE);
+        }
     }
 
 //ruta y apertura de los archivos 
@@ -186,9 +188,9 @@ void init_simulation(int start, int max_sweeps, float T){
 //Correlación
         if(i>=500 && i%10 == 0){//tomamos valores cada 10 sweeps a partir de 500 (termalizacion)    
             fprintf(archivo, "%d,%d,%d,%d,%d\n", i,H_tot,mag,H_tot,mag);
-            for(int d=1;d<=SIZE;d++){
+            for(int d=0;d<SIZE;d++){
                 corr = corr_d(lattice,d);
-                fprintf(archivocorr,"%d,%f\n",d-1,corr);
+                fprintf(archivocorr,"%d,%f\n",d,corr);
             }
         }else{
             fprintf(archivo, "%d,%d,%d,%s,%s\n", i,H_tot,mag,"NaN","NaN");
@@ -199,11 +201,14 @@ void init_simulation(int start, int max_sweeps, float T){
     fclose(archivocorr);
 }
 
-void corr_test(){
+void corr_test(int sweeps,float T){
     int lattice[SIZE][SIZE];
     float corr,sigma;
     initialize_lattice(lattice);
-    
+    for(int i=0;i<sweeps;i++){
+    sweep(lattice,T);
+    }
+
     print_lattice(lattice);
 
     printf("sigma:\n");
@@ -216,28 +221,44 @@ void corr_test(){
     printf("\n");
     
     printf("corr(d):\n");
-    for(int d=1;d<=SIZE;d++){//Importante que vaya de 1 a SIZE porque si no no inicia el for, de cero 0 a SIZE.
+    for(int d=0;d<SIZE;d++){
         corr = corr_d(lattice,d);
         printf("%.4f\t",corr);
     }
 
-    printf("\n");
+    printf("\n\n");
+    printf("seed: %ld",time(NULL));
 }
 
-int main(){
-    srand(316032629);
-
+void final_simulation(int max_sweeps){
 /*
-    int max_sweeps = 10000;
-    
-    for(float T=1.5;T<=3.8;T=T+0.1){
+    for(float T=1.5;T<=2.1;T=T+0.1){
         //init_simulation(0,max_sweeps,T);
         init_simulation(1,max_sweeps,T);
         printf("T=%.1f\n",T);
     }
-    printf("Listo :) , L=%d\n",SIZE);
 */
-    corr_test();
+    for(float T=2.13;T<=2.37;T=T+0.03){
+        init_simulation(1,max_sweeps,T);
+        printf("T=%.2f\n",T);
+    }
+/*
+    for(float T=2.4;T<=3.8;T=T+0.1){
+        //init_simulation(0,max_sweeps,T);
+        init_simulation(1,max_sweeps,T);
+        printf("T=%.1f\n",T);
+    }
+*/
+    printf("Listo :) , L=%d\n",SIZE);
+}
 
+int main(){
+    srand(time(NULL));
+
+    int max_sweeps = 10000;
+    final_simulation(max_sweeps);
+
+//    corr_test(max_sweeps,3.8);
+    
 return 0;
 }
