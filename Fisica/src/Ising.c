@@ -144,31 +144,23 @@ void sweep(int lattice[SIZE][SIZE], float T){
 
 void init_simulation(int start, int max_sweeps, float T){
     
-    int lattice[SIZE][SIZE];
-    int H_tot,mag;
-    float corr;
+    int lattice[SIZE][SIZE]={0};
+    int H_tot=0,mag=0;
+    float corr=0;
     char ruta[500];
     char ruta_corr[100];
 
 //Rutas, archivos e inicialización hot y cold
     if(start == 0){
-        if(T>=2.13 && T<=2.37){
-            sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_cold_t%.2f_%d.csv",T,SIZE);
-        }else{
-            sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_cold_t%.1f_%d.csv",T,SIZE);
-        }
         init_paralel_lattice(lattice,1);
+        sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_cold_t%.2f_%d.csv",T,SIZE);        
     }else{
-    initialize_lattice(lattice);
-        if(T>=2.13 && T<=2.37){
-            sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_hot_t%.2f_%d.csv",T,SIZE);
-        }else{
-            sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_hot_t%.2f_%d.csv",T,SIZE);
-        }
+        initialize_lattice(lattice);
+        sprintf(ruta,"../../Notebooks_Py/Datos/Ising/ising_2d_hot_t%.2f_%d.csv",T,SIZE);   
     }
 
 //ruta y apertura de los archivos 
-    sprintf(ruta_corr,"../../Notebooks_Py/Datos/Ising/ising_2d_corr_t%.1f_%d.csv",T,SIZE);
+    sprintf(ruta_corr,"../../Notebooks_Py/Datos/Ising/ising_2d_corr_t%.2f_%d.csv",T,SIZE);
     FILE *archivocorr = fopen(ruta_corr,"w");
     FILE *archivo = fopen(ruta, "w");
 
@@ -231,24 +223,24 @@ void corr_test(int sweeps,float T){
 }
 
 void final_simulation(int max_sweeps){
-/*
+
     for(float T=1.5;T<=2.1;T=T+0.1){
         //init_simulation(0,max_sweeps,T);
         init_simulation(1,max_sweeps,T);
         printf("T=%.1f\n",T);
     }
-*/
+
     for(float T=2.13;T<=2.37;T=T+0.03){
         init_simulation(1,max_sweeps,T);
         printf("T=%.2f\n",T);
     }
-/*
+
     for(float T=2.4;T<=3.8;T=T+0.1){
         //init_simulation(0,max_sweeps,T);
         init_simulation(1,max_sweeps,T);
         printf("T=%.1f\n",T);
     }
-*/
+
     printf("Listo :) , L=%d\n",SIZE);
 }
 
@@ -256,8 +248,20 @@ int main(){
     srand(time(NULL));
 
     int max_sweeps = 10000;
+
+    //Simulación para todas las T
     final_simulation(max_sweeps);
 
+    //Simulación para una sola temperatura 
+//    init_simulation(1,max_sweeps,2.13);
+
+    //Simulación para un rango de temperaturas
+/*    for(float T=2.13;T<=2.37;T=T+0.03){
+        init_simulation(1,max_sweeps,T);
+        printf("T=%.2f\n",T);
+    }
+*/
+    //Test de correlación
 //    corr_test(max_sweeps,3.8);
     
 return 0;
