@@ -4,7 +4,7 @@
 #include <time.h>
 #include "../lib/my_math_stats.h"
 
-#define SIZE 128
+#define SIZE 8
 
 typedef struct{
     int down;
@@ -262,7 +262,7 @@ int main(){
     }
 */
     //Test de correlación
-//    corr_test(max_sweeps,3.8);
+    //corr_test(max_sweeps,3.8);
     
 return 0;
 }
