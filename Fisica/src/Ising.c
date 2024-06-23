@@ -4,7 +4,7 @@
 #include <time.h>
 #include "../lib/my_math_stats.h"
 
-#define SIZE 8
+#define SIZE 128
 
 typedef struct{
     int down;
@@ -178,7 +178,7 @@ void init_simulation(int start, int max_sweeps, float T){
         H_tot = H(lattice);
         mag = M(lattice);
 //Correlación
-        if(i>=500 && i%10 == 0){//tomamos valores cada 10 sweeps a partir de 500 (termalizacion)    
+        if(i>=1000 && i%10 == 0){//tomamos valores cada 10 sweeps a partir de 1000 (termalizacion)    
             fprintf(archivo, "%d,%d,%d,%d,%d\n", i,H_tot,mag,H_tot,mag);
             for(int d=0;d<SIZE;d++){
                 corr = corr_d(lattice,d);
@@ -247,13 +247,13 @@ void final_simulation(int max_sweeps){
 int main(){
     srand(time(NULL));
 
-    int max_sweeps = 10000;
+    int max_sweeps = 101000;
 
     //Simulación para todas las T
-    final_simulation(max_sweeps);
+    //final_simulation(max_sweeps);
 
     //Simulación para una sola temperatura 
-//    init_simulation(1,max_sweeps,2.13);
+    init_simulation(1,max_sweeps,1.6);
 
     //Simulación para un rango de temperaturas
 /*    for(float T=2.13;T<=2.37;T=T+0.03){
