@@ -98,9 +98,9 @@ void init_simulation(int start, int max_sweeps,int thermalization, float epsilon
 
 //Rutas, archivos e inicialización hot y cold
     initialize_x(x,start);
-    sprintf(ruta_SE,"../../Notebooks_Py/Datos/Oscillator/SE/start_%d_eps_%.2f_size_%d_a_%.2f.csv",start,epsilon,SIZE,a);
-    sprintf(ruta_trayec,"../../Notebooks_Py/Datos/Oscillator/trayec/start_%d_eps_%.2f_size_%d_a_%.2f.csv",start,epsilon,SIZE,a);
-    sprintf(ruta_acc_rates,"../../Notebooks_Py/Datos/Oscillator/acc_rates/start_%d_eps_%.2f_size_%d_a_%.2f.csv",start,epsilon,SIZE,a);
+    sprintf(ruta_SE,"../../Notebooks_Py/Datos/Oscillator/SE/start_%d_eps_%.2f_size_%d_a_%.2f_lambda_%.2f.csv",start,epsilon,SIZE,a,lambda);
+    sprintf(ruta_trayec,"../../Notebooks_Py/Datos/Oscillator/trayec/start_%d_eps_%.2f_size_%d_a_%.2f_lambda_%.2f.csv",start,epsilon,SIZE,a,lambda);
+    sprintf(ruta_acc_rates,"../../Notebooks_Py/Datos/Oscillator/acc_rates/start_%d_eps_%.2f_size_%d_a_%.2f_lambda_%.2f.csv",start,epsilon,SIZE,a,lambda);
 
 //ruta y apertura de los archivos 
    
@@ -157,8 +157,8 @@ void init_simulation(int start, int max_sweeps,int thermalization, float epsilon
 void epsilon_rates(float init_epsilon, float final_epsilon, float step, float a, float lambda){
 
     float epsilon = init_epsilon;
-    while(epsilon <=final_epsilon){
-        int start = 0;
+    while(epsilon <=final_epsilon+step){
+        int start = 1;
         int max_sweeps = 11000;
         int thermalization = 1000;
         int save_acc_rates = 1;
@@ -176,7 +176,7 @@ int main(){
     
 
     //Simulation
-    /*
+    
     srand(time(NULL));
     int start = 0;
     int max_sweeps = 11000;
@@ -184,21 +184,23 @@ int main(){
     float epsilon = 0.5;
     float a = 1.0;
     float lambda = 0.0;
-    int save_acc_rates = 1;
+    int save_acc_rates = 0;
     init_simulation(start,max_sweeps,thermalization,epsilon,a,lambda,save_acc_rates);
     printf("\nSimulación completado!\n");
-    */
+    
 
     //Epsilon rates
-    
+    /*
     srand(time(NULL));
     float init_epsilon = 0.0;
     float final_epsilon = 2.0;
     float step = 0.2;
-    float a = 1.0;
-    float lambda = 0.0;
+    float a = 0.05;
+    float lambda = 1;
     epsilon_rates(init_epsilon,final_epsilon,step,a,lambda);
     printf("\nacc rates completado!\n");
-    
+    printf("a: %f, lambda: %f",a,lambda);
+    */
+
     return 0;
 }
