@@ -31,11 +31,11 @@ void print_x(float x[SIZE]){
     printf("\n");
 }
 
-float T(float x[SIZE],int i){
+float T(float x[SIZE],int i,float a){
     if (i==SIZE-1){
         return 0;
     }else{
-        return 0.5*pow((x[i+1]-x[i]),2.0);
+        return pow((x[i+1]-x[i])/(2*a),2.0);
     }
 }
 
@@ -47,9 +47,9 @@ float S_E(float x[SIZE],float a,float lambda){
     float sum=0.0;
 
     for(int i =0; i<SIZE; i++){
-        sum+=T(x,i)+a*V(x,i,lambda);
+        sum+=T(x,i,a)+V(x,i,lambda);
     }
-    return sum;
+    return sum*a;
 }
 
 float sweep(float x[SIZE],float epsilon, float a,float lambda){
@@ -86,27 +86,34 @@ float sweep(float x[SIZE],float epsilon, float a,float lambda){
     return acc_rate/(SIZE-1);
 }
 
-float rates[2]={0};
+float corr_d(float x[SIZE],int d){
+    return x[0]*x[d];
+}
+
 void init_simulation(int start, int max_sweeps,int thermalization, float epsilon, float a, float lambda,int save_acc_rates){
 
     float x[SIZE]={0};
     char ruta_SE[500];
     char ruta_trayec[500];
     char ruta_acc_rates[500];
+    char ruta_corr[100];
     float SE;
     float acc_rate_i;
+    float corr;
 
 //Rutas, archivos e inicialización hot y cold
     initialize_x(x,start);
     sprintf(ruta_SE,"../../Notebooks_Py/Datos/Oscillator/SE/start_%d_eps_%.2f_size_%d_a_%.2f_lambda_%.2f.csv",start,epsilon,SIZE,a,lambda);
     sprintf(ruta_trayec,"../../Notebooks_Py/Datos/Oscillator/trayec/start_%d_eps_%.2f_size_%d_a_%.2f_lambda_%.2f.csv",start,epsilon,SIZE,a,lambda);
     sprintf(ruta_acc_rates,"../../Notebooks_Py/Datos/Oscillator/acc_rates/start_%d_eps_%.2f_size_%d_a_%.2f_lambda_%.2f.csv",start,epsilon,SIZE,a,lambda);
+    sprintf(ruta_corr,"../../Notebooks_Py/Datos/Oscillator/corr/start_%d_eps_%.2f_size_%d_a_%.2f_lambda_%.2f.csv",start,epsilon,SIZE,a,lambda);
 
 //ruta y apertura de los archivos 
    
     FILE *archivo_SE = fopen(ruta_SE, "w");
     FILE *archivo_trayec = fopen(ruta_trayec, "w");
     FILE *archivo_acc_rates = fopen(ruta_acc_rates, "w");
+    FILE *archivo_corr = fopen(ruta_corr, "w");
 
 //Cabeceras de los archivos csv
     fprintf(archivo_SE,"sweep,S_E\n");
@@ -121,6 +128,9 @@ void init_simulation(int start, int max_sweeps,int thermalization, float epsilon
     }
 //cabecera del archivo acc_rates
     fprintf(archivo_acc_rates,"epsilon,acc_rate\n");
+
+//cabecera del archivo corr
+    fprintf(archivo_corr,"d,corr\n");
     
 //Estado inicial
     SE = S_E(x,a,lambda);
@@ -133,13 +143,16 @@ void init_simulation(int start, int max_sweeps,int thermalization, float epsilon
             for(int j=0;j<SIZE;j++){
                 if(j==SIZE-1){
                     fprintf(archivo_trayec,"%f\n",x[j]);
+                    fprintf(archivo_corr,"%d,%f\n",j,corr_d(x,j));
                 }else{
                     fprintf(archivo_trayec,"%f,",x[j]);
+                    fprintf(archivo_corr,"%d,%f\n",j,corr_d(x,j));
                 }
             }
             if(save_acc_rates==1){
                 fprintf(archivo_acc_rates,"%f,%f\n",epsilon,acc_rate_i);
-            }   
+            }
+            
         }
 
         acc_rate_i = sweep(x,epsilon,a,lambda);
@@ -150,6 +163,7 @@ void init_simulation(int start, int max_sweeps,int thermalization, float epsilon
     fclose(archivo_SE);
     fclose(archivo_trayec);
     fclose(archivo_acc_rates);
+    fclose(archivo_corr);
 
 }
 
@@ -159,8 +173,8 @@ void epsilon_rates(float init_epsilon, float final_epsilon, float step, float a,
     float epsilon = init_epsilon;
     while(epsilon <=final_epsilon+step){
         int start = 1;
-        int max_sweeps = 11000;
-        int thermalization = 1000;
+        int max_sweeps = 510000;
+        int thermalization = 10000;
         int save_acc_rates = 1;
         init_simulation(start,max_sweeps,thermalization,epsilon,a,lambda,save_acc_rates);
         epsilon+=step;
@@ -173,34 +187,42 @@ int main(){
     
     
     //Tests
-    
 
     //Simulation
-    
+    /*
     srand(time(NULL));
-    int start = 0;
-    int max_sweeps = 11000;
-    int thermalization = 1000;
-    float epsilon = 0.5;
-    float a = 1.0;
-    float lambda = 0.0;
-    int save_acc_rates = 0;
-    init_simulation(start,max_sweeps,thermalization,epsilon,a,lambda,save_acc_rates);
-    printf("\nSimulación completado!\n");
     
+    int max_sweeps = 510000;
+    int thermalization = 10000;
+    int start[2]={0,1};
+    float epsilon = 0.7;
+    float a = 1;
+    float lambda = 1;
+    int save_acc_rates = 0;
+    for(int i=0;i<2;i++){
+        init_simulation(start[i],max_sweeps,thermalization,epsilon,a,lambda,save_acc_rates);
+        printf("start: %d,a: %f, lambda: %f\n",start[i],a,lambda);
+    }
+    printf("\nSimulación completada!\n");
+    */
 
     //Epsilon rates
-    /*
+    
     srand(time(NULL));
     float init_epsilon = 0.0;
     float final_epsilon = 2.0;
     float step = 0.2;
-    float a = 0.05;
-    float lambda = 1;
-    epsilon_rates(init_epsilon,final_epsilon,step,a,lambda);
+    float lambda[3]={0.0,0.5,1.0};
+    float a[5]={1.0,0.5,0.25,0.1,0.05};
+    for(int j=0;j<3;j++){
+        for(int i=0;i<5;i++){
+            epsilon_rates(init_epsilon,final_epsilon,step,a[i],lambda[j]);
+            
+            printf("a: %f, lambda: %f",a[i],lambda[j]);
+        }
+    }
     printf("\nacc rates completado!\n");
-    printf("a: %f, lambda: %f",a,lambda);
-    */
+    
 
     return 0;
 }
