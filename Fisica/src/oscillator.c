@@ -90,7 +90,7 @@ float corr_d(float x[SIZE],int d){
     return x[0]*x[d];
 }
 
-void init_simulation(int start, int max_sweeps,int thermalization, float epsilon, float a, float lambda,int save_acc_rates){
+void init_simulation(int start, int max_sweeps,int thermalization, float epsilon, float a, float lambda,int save_acc_rates, int save_SE, int save_trayec_corr){
 
     float x[SIZE]={0};
     char ruta_SE[500];
@@ -132,7 +132,7 @@ void init_simulation(int start, int max_sweeps,int thermalization, float epsilon
 //cabecera del archivo corr
     fprintf(archivo_corr,"d,corr\n");
     
-//Estado inicial
+//cabecera del archivo SE
     SE = S_E(x,a,lambda);
     fprintf(archivo_SE, "%d,%f\n",0,SE);
 
@@ -140,16 +140,18 @@ void init_simulation(int start, int max_sweeps,int thermalization, float epsilon
     for(int i =1;i<max_sweeps;i++){
        
         if(i>thermalization && i%10==0){
-            for(int j=0;j<SIZE;j++){
-                if(j==SIZE-1){
-                    fprintf(archivo_trayec,"%f\n",x[j]);
-                    fprintf(archivo_corr,"%d,%f\n",j,corr_d(x,j));
-                }else{
-                    fprintf(archivo_trayec,"%f,",x[j]);
-                    fprintf(archivo_corr,"%d,%f\n",j,corr_d(x,j));
+            if(save_trayec_corr==1){ //Si se quiere guardar trayectoria y correlaciones
+                for(int j=0;j<SIZE;j++){
+                    if(j==SIZE-1){
+                        fprintf(archivo_trayec,"%f\n",x[j]);
+                        fprintf(archivo_corr,"%d,%f\n",j,corr_d(x,j));
+                    }else{
+                        fprintf(archivo_trayec,"%f,",x[j]);
+                        fprintf(archivo_corr,"%d,%f\n",j,corr_d(x,j));
+                    }
                 }
             }
-            if(save_acc_rates==1){
+            if(save_acc_rates==1){ //Si se quiere guardar los acc rates
                 fprintf(archivo_acc_rates,"%f,%f\n",epsilon,acc_rate_i);
             }
             
@@ -157,7 +159,9 @@ void init_simulation(int start, int max_sweeps,int thermalization, float epsilon
 
         acc_rate_i = sweep(x,epsilon,a,lambda);
         SE = S_E(x,a,lambda);
-        fprintf(archivo_SE, "%d,%f\n", i,SE);
+        if(save_SE==1){//Si se quieren guardar las energias
+            fprintf(archivo_SE, "%d,%f\n", i,SE);
+        }
     }
 
     fclose(archivo_SE);
@@ -167,47 +171,79 @@ void init_simulation(int start, int max_sweeps,int thermalization, float epsilon
 
 }
 
-
 void epsilon_rates(float init_epsilon, float final_epsilon, float step, float a, float lambda){
 
     float epsilon = init_epsilon;
     while(epsilon <=final_epsilon+step){
         int start = 1;
-        int max_sweeps = 510000;
+        int max_sweeps = 110000;
         int thermalization = 10000;
         int save_acc_rates = 1;
-        init_simulation(start,max_sweeps,thermalization,epsilon,a,lambda,save_acc_rates);
+        int save_SE = 0;
+        int save_trayec_corr = 0;
+        init_simulation(start,max_sweeps,thermalization,epsilon,a,lambda,save_acc_rates,save_SE,save_trayec_corr);
         epsilon+=step;
     }
-    
 }
 
+void SE_eps_fix(float epsilon,float lambda, float a){
+    //params
+    int max_sweeps = 510000;
+    int thermalization = 10000;
+    int start[2]={0,1};
+
+    //save files
+    int save_acc_rates = 0;
+    int save_SE = 1;
+    int save_trayec_corr=0;
+    for(int i=0;i<2;i++){
+        init_simulation(start[i],max_sweeps,thermalization,epsilon,a,lambda,save_acc_rates,save_SE,save_trayec_corr);
+        printf("start: %d,a: %f, lambda: %f\n",start[i],a,lambda);
+    }
+    printf("\nSimulación completada!\n");
+}
 
 int main(){
     
     
     //Tests
 
-    //Simulation
-    /*
+    //Simulation trayectorias y correlaciones
+    
     srand(time(NULL));
     
+    //params
     int max_sweeps = 510000;
     int thermalization = 10000;
-    int start[2]={0,1};
-    float epsilon = 0.7;
-    float a = 1;
-    float lambda = 1;
+    int start = 1;
+    float epsilon[5] = {0.75,0.65,0.5,0.33,0.24};
+    float a [5]= {1.0,0.5,0.25,0.1,0.05};
+    float lambda = 0;
+    
+    //save files
     int save_acc_rates = 0;
-    for(int i=0;i<2;i++){
-        init_simulation(start[i],max_sweeps,thermalization,epsilon,a,lambda,save_acc_rates);
-        printf("start: %d,a: %f, lambda: %f\n",start[i],a,lambda);
+    int save_SE = 0;
+    int save_trayec_corr=1;
+    
+    for(int i=0;i<5;i++){
+        init_simulation(start,max_sweeps,thermalization,epsilon[i],a[i],lambda,save_acc_rates,save_SE,save_trayec_corr);
+        printf("start: %d,a: %f, lambda: %f\n",start,a[i],lambda);
+        printf("\nSimulación completada!\n");
     }
-    printf("\nSimulación completada!\n");
+    
+
+    //SE, epsilon fix
+    /*
+    float epsilon = 0.7;
+    float lambda[3] = {0,0.5,1};
+    float a = 0.1;
+    for(int i=0;i<3;i++){
+        SE_eps_fix(epsilon,lambda[i],a);
+    }
     */
 
     //Epsilon rates
-    
+    /*
     srand(time(NULL));
     float init_epsilon = 0.0;
     float final_epsilon = 2.0;
@@ -218,11 +254,11 @@ int main(){
         for(int i=0;i<5;i++){
             epsilon_rates(init_epsilon,final_epsilon,step,a[i],lambda[j]);
             
-            printf("a: %f, lambda: %f",a[i],lambda[j]);
+            printf("a: %f, lambda: %f\n",a[i],lambda[j]);
         }
     }
     printf("\nacc rates completado!\n");
-    
+    */
 
     return 0;
 }
