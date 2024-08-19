@@ -144,9 +144,9 @@ int main(){
             epsilon = eps[ind_eps];
             int j = 0;
             for (int i = 0; i < REPETITIONS; i++){
-                sweep(x,epsilon,a,lambda);
+                float s = sweep(x,epsilon,a,lambda);
                 if (i>=TERMALIZATION && i%steps_to_measure==0){
-                    acc_rate[j] = sweep(x,epsilon,a,lambda);
+                    acc_rate[j] = s;
                     j++;
                 }
             }
