@@ -50,20 +50,22 @@ float S_E(float x[SIZE],float a,float lambda){
             sum+=0.5*pow(x[i],2)+lambda*pow(x[i],4.0);
         }else{
             sum += 0.5 * pow((x[i+1] - x[i]) / a, 2) + 0.5 * pow(x[i], 2) + lambda * pow(x[i], 4.0);
-
         } 
     }
     return a*sum;
 }
 
+
 float dSE(float xl, float x0, float xr, float xf, float a, float lambda){
     float sum=0.0;
-    sum += (pow(xr - xf, 2) - pow(xr - x0, 2)) /(2*a);// (2 * pow(a, 2));
-    sum += (pow(xf - xl, 2) - pow(x0 - xl, 2)) /(2*a);// (2 * pow(a, 2));
+    sum += (pow(xr - xf, 2) - pow(xr - x0, 2)) /(2*a*a);
+    sum += (pow(xf - xl, 2) - pow(x0 - xl, 2)) /(2*a*a);
     sum += 0.5*(pow(xf,2)-pow(x0,2));
     sum += lambda*(pow(xf,4.0)-pow(x0,4.0));
-    return sum;
+    return a*sum;
 }
+
+
 
 
 float sweep(float x[SIZE],float epsilon, float a,float lambda){
@@ -73,12 +75,9 @@ float sweep(float x[SIZE],float epsilon, float a,float lambda){
 
     for(int i=0;i<SIZE;i++){
         if(i==SIZE-1){
-            x[i]=x[0];// condicion peridica
-            /*
             xr = x[0];
             x0 = x[i];
             xl = x[i-1];
-            */
         }
         else if(i==0){
             xr = x[i+1];
@@ -114,47 +113,22 @@ float sweep(float x[SIZE],float epsilon, float a,float lambda){
 }
 
 
-float corr_d(float x[SIZE],int d){
-    return x[0]*x[d];
-}
-
-#define REPETITIONS 510000//101000//510000
-#define TERMALIZATION 10000//1000//10000
+#define REPETITIONS 101000//101000//510000
+#define TERMALIZATION 1000//1000//10000
 #define STEPS_TO_MEASURE 10
 #define MEASURES ((REPETITIONS-TERMALIZATION)/STEPS_TO_MEASURE)
 int main(){
-    /*
-    srand(316032629);
-
-    float x[SIZE];
-    //int start = 1; //Hot: 1, Cold: 0
-    
-    initialize_x(x,1);
-    int steps_to_measure = 10;
-
-    float epsilon = 0.35;
-    float a=0.1;
-    float lambda = 0.0;
-    
-    printf("x0,x1,x2,x3,x4,x5,x6,x7,x8,x9\n");
-    print_x(x);
-    for(int i = 0; i < 500000; i++){
-        sweep(x,epsilon,a,lambda);
-        print_x(x);
-    }
-*/
-    /*
+/*
     srand(time(NULL));
     float x[SIZE];
-    //int start = 1; //Hot: 1, Cold: 0
+    int start = 1; //Hot: 1, Cold: 0
     
-    initialize_x(x,1);
+    initialize_x(x,start);
     int steps_to_measure = 10;
 
     float epsilon = 0.7;
-    float a=1;
+    float a=0.05;
     float lambda = 0.0;
-    
     
     float acc_rate = 0.0;
     float sw;
@@ -179,6 +153,7 @@ int main(){
     printf("x5: %f\n",x5/MEASURES);
     printf("x9: %f\n",x9/MEASURES);
 */
+
     //SE 
 /*
     float x0[SIZE];
@@ -188,9 +163,9 @@ int main(){
     initialize_x(x1,1);
     int steps_to_measure = 10;
 
-    float epsilon = 0.8;
-    float a=1.0;
-    float lambda = 0.0;
+    float epsilon = 0.2;
+    float a=0.05;
+    float lambda = 1;
     
     
     printf("SE_cold,SE_hot\n");
@@ -201,11 +176,29 @@ int main(){
             printf("%f,%f\n",S_E(x0,a,lambda),S_E(x1,a,lambda));   
         }
     }
-
 */
+
     //Information
-    //printf("MEASURES: %d , epsilon: %0.2f , lambda: %0.2f, a: %0.2f \n",MEASURES,epsilon,lambda,a);
+   // printf("MEASURES: %d , epsilon: %0.2f , lambda: %0.2f, a: %0.2f \n",MEASURES,epsilon,lambda,a);
+
+/*
+     //CONTROL PASS
+    srand(time(NULL));
+    float x0[SIZE]={5,1,2,4,5,6,7,8,9,2};
+    float x1[SIZE]={5,1,2,4,5,8,7,8,9,2};
     
+    float a = 0.05;
+    float lambda = 1;
+
+    float s0  = S_E(x0,a,lambda);
+    float s1  = S_E(x1,a,lambda);
+
+    printf("s0: %f\n",s0);
+    printf("s1: %f\n",s1);
+
+    printf("s1-s0: %f\n",s1-s0);
+    printf("s0-s1: %f\n",dSE(x0[4],x0[5],x0[6],x1[5],a,lambda));
+*/
 
     return 0;
 }

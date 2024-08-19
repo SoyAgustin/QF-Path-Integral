@@ -46,14 +46,6 @@ float V(float x[SIZE], int i,float lambda){
 float S_E(float x[SIZE],float a,float lambda){
     float sum=0.0;
     
-    /*
-    for(int i =0; i<SIZE; i++){
-        sum+=T(x,i,a)+V(x,i,lambda);
-    }
-    return sum*a;
-*/
-    
-   
    for(int i =0; i<SIZE; i++){
         if(i==SIZE-1){
             sum+=0.5*pow(x[i],2)+lambda*pow(x[i],4.0);
@@ -64,6 +56,14 @@ float S_E(float x[SIZE],float a,float lambda){
     }
     return a*sum;
     
+}
+
+float SE(float x[SIZE],float a,float lambda){
+    float sum=0;
+    for(int i =0; i<SIZE; i++){
+        sum+=T(x,i,a)+V(x,i,lambda);
+    }
+    return sum*a;
 }
 
 float dSE(float xl, float x0, float xr, float xf, float a, float lambda){
@@ -168,15 +168,9 @@ int main(){
     float epsilon=0.7;
     float a =1;
     float lambda = 0;
-    
-    float dse = S_E(x1,a,lambda)-S_E(x0,a,lambda);
-    float dse2 = dSE(x0[4],x0[5],x0[6],x1[5],a,lambda);
-    
 
-    printf("SE0: %f\n",S_E(x0,a,lambda));
-    printf("SE1: %f\n",S_E(x1,a,lambda));
-    printf("dse: %f\n",dse);
-    printf("dse2: %f\n",dse2);
+    printf("SE: %f\n",S_E(x0,a,lambda));
+    printf("SE: %f\n",SE(x1,a,lambda));
     
     return 0;
 }
