@@ -65,9 +65,7 @@ float dSE(float xl, float x0, float xr, float xf, float a, float lambda){
     return a*sum;
 }
 
-
-
-
+/*
 float sweep(float x[SIZE],float epsilon, float a,float lambda){
     float xl,x0,xr,xf=0;
     float rho = 0.0;
@@ -111,6 +109,43 @@ float sweep(float x[SIZE],float epsilon, float a,float lambda){
 
     return (float)acc_rate/(SIZE);
 }
+*/
+
+float sweep(float x[SIZE],float epsilon, float a,float lambda){
+    float SE_0,SE_s,dse;
+    float p,rand,rho;
+    float acc_rate = 0.0;
+
+    for(int i=0;i<SIZE;i++){
+        if(i==SIZE-1){
+            x[i]=x[0];// condicion peridica
+        }
+        else{
+            rho = randnum(-epsilon,epsilon);
+            
+            float xp = x[i]+rho;
+            //x[i] = x[i]+rho;//Hacemos un cambio 
+            
+            dse = dSE(x[i-1%SIZE],x[i],x[i+1%SIZE],xp,a,lambda);
+            if(dse<=0){
+                acc_rate++;
+                x[i] = x[i]+rho;
+            }
+            if(dse>0){ //Si es mayor que cero 
+                p = exp(-1*dse);
+                rand = randnum(0,1);
+                if(rand>p){ //Si es mayor que p, se rechaza el cambio
+
+                }else{
+                    acc_rate++;
+                    x[i] = x[i]+rho;
+                }
+            }
+        }  
+   
+    }
+    return acc_rate/(SIZE-1);
+}
 
 
 #define REPETITIONS 101000//101000//510000
@@ -118,7 +153,7 @@ float sweep(float x[SIZE],float epsilon, float a,float lambda){
 #define STEPS_TO_MEASURE 10
 #define MEASURES ((REPETITIONS-TERMALIZATION)/STEPS_TO_MEASURE)
 int main(){
-/*
+
     srand(time(NULL));
     float x[SIZE];
     int start = 1; //Hot: 1, Cold: 0
@@ -126,9 +161,9 @@ int main(){
     initialize_x(x,start);
     int steps_to_measure = 10;
 
-    float epsilon = 0.7;
-    float a=0.05;
-    float lambda = 0.0;
+    float epsilon = 0.25;
+    float a=0.1;
+    float lambda = 0;
     
     float acc_rate = 0.0;
     float sw;
@@ -152,7 +187,7 @@ int main(){
     printf("x0: %f\n",x0/(MEASURES));
     printf("x5: %f\n",x5/MEASURES);
     printf("x9: %f\n",x9/MEASURES);
-*/
+
 
     //SE 
 /*
