@@ -3,8 +3,8 @@
 
 //Random numbers
 
-double randnum(float min, float max) {
-    float num = (float)rand()/RAND_MAX;
+double randnum(double min, double max) {
+    double num = (double)rand()/RAND_MAX;
     num = min+(max-min)*num;
     return num;
 }

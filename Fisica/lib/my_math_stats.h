@@ -2,7 +2,7 @@
 #define MY_MATH_STATS_H
 
 //Random numbers
-double randnum(float min, float max);
+double randnum(double min, double max);
 int randnum_int(int min,int max);
 
 //Stats
