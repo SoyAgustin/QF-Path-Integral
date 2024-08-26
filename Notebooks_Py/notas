@@ -1,0 +1,15 @@
+#COMPILE AND EXCECUTE (src)
+
+gcc -o ../bin/oscillator_final ./oscillator_final.c ../lib/*.c -lm && time ../bin/oscillator_final
+
+#COMPILE (src)
+
+gcc -o ../bin/oscillator_final ./oscillator_final.c ../lib/*.c -lm
+
+#ACC RATES (root)
+
+time ./Fisica/bin/oscillator_final > ./Notebooks_Py/Datos/Oscillator/acc_rates/acc_l_1.0_a_0.0625.csv
+
+#SE_HOT_COLD (root)
+
+time ./Fisica/bin/oscillator_final > ./Notebooks_Py/Datos/Oscillator/SE/lambda_1.0.csv
