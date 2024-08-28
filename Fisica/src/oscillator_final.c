@@ -5,8 +5,9 @@
 #include "../lib/my_math_stats.h"
 
 #define SIZE 10
-double a = (10.0/(double)SIZE);
-double lambda  = 0.0;
+#define N 10
+double a = ((double)SIZE/N);
+double lambda  = 0.5;
 double epsilon = 0.75;
 
 // iteraciones de Humberto 4000000
@@ -16,27 +17,27 @@ double epsilon = 0.75;
 #define MEASURES ((REPETITIONS-TERMALIZATION)/STEPS_TO_MEASURE)
 
 
-void initialize_x(double x[SIZE],int start){
+void initialize_x(double x[N],int start){
     if (start==0){
-        for (int i = 0; i < SIZE; i++){
+        for (int i = 0; i < N; i++){
             x[i]=0.0;
     }
     }else{
-        for (int i = 0; i < SIZE; i++){
+        for (int i = 0; i < N; i++){
             double pos = randnum(-1.0,1.0); //reales entre -1 y 1
             x[i]=pos;
             } 
         } 
 }
 
-void print_x(double x[SIZE]){
+void print_x(double x[N]){
     
-    for (int i = 0; i < SIZE; i++){
+    for (int i = 0; i < N; i++){
         
         if(i==0){
             printf("%f,",x[i]);
         }
-        else if(i==SIZE-1){
+        else if(i==N-1){
             printf("%f\n",x[i]);
         }else{
         printf("%f,",x[i]);
@@ -47,11 +48,11 @@ void print_x(double x[SIZE]){
     
 }
 
-double S_E(double x[SIZE]){
+double S_E(double x[N]){
     double sum=0.0;
 
-    for(int i =0; i<SIZE; i++){
-        if(i==SIZE-1){
+    for(int i =0; i<N; i++){
+        if(i==N-1){
             sum += 0.5*pow((x[0] - x[i])/a, 2) + 0.5*pow(x[i],2) + lambda*pow(x[i],4.0); //Condición periodica x[N+1] = x[0]
         }else{
             sum += 0.5*pow((x[i+1] - x[i])/a, 2) + 0.5 * pow(x[i], 2) + lambda*pow(x[i], 4.0);
@@ -69,17 +70,17 @@ double dSE(double xl, double x0, double xr, double xf){
     return a*sum;
 }
 
-double sweep(double x[SIZE],double epsilon){
+double sweep(double x[N],double epsilon){
     double dse,xp = 0.0;
     double p,rand,rho = 0.0;
     double acc_rate = 0.0;
     int i = 0;
 
-    for(i=0;i<SIZE;i++){
+    for(i=0;i<N;i++){
         
         rho = randnum(-epsilon,epsilon); //numero aleatorio entre -epsilon y +epsilon
         xp = x[i]+rho; //Hacemos un cambio en la componente i 
-        dse = dSE(x[(i-1)%SIZE],x[i],x[(i+1)%SIZE],xp); //calculamos el cambio de accion
+        dse = dSE(x[(i-1)%N],x[i],x[(i+1)%N],xp); //calculamos el cambio de accion
 
         if(dse<=0.0){ //si es menor o igual que cero se realiza el cambio
             acc_rate++;
@@ -96,12 +97,12 @@ double sweep(double x[SIZE],double epsilon){
         }
    
     }
-    return acc_rate/(SIZE);
+    return acc_rate/(N);
 }
 
 void test_SE_dse(double x_0, double xp){
-    double x0[SIZE]={0.1,0.2,0.3,0.4,0.5,x_0,0.7,0.8,0.9,1.0};
-    double x1[SIZE]={0.1,0.2,0.3,0.4,0.5,xp,0.7,0.8,0.9,1.0};
+    double x0[N]={0.1,0.2,0.3,0.4,0.5,x_0,0.7,0.8,0.9,1.0};
+    double x1[N]={0.1,0.2,0.3,0.4,0.5,xp,0.7,0.8,0.9,1.0};
 
     double s0  = S_E(x0);
     double s1  = S_E(x1);
@@ -114,8 +115,8 @@ void test_SE_dse(double x_0, double xp){
 }
 
 void SE_cold_hot(double epsilon){
-    double x0[SIZE] = {0.0};
-    double x1[SIZE] = {0.0};
+    double x0[N] = {0.0};
+    double x1[N] = {0.0};
     
     double SE_0[MEASURES]={0.0};
     double SE_1[MEASURES]={0.0};
@@ -135,14 +136,10 @@ void SE_cold_hot(double epsilon){
             j++;   
         }
     }
-
-    //printf("mean cold: %.6f, mean hot: %.6f\n",mean(MEASURES,SE_0),mean(MEASURES,SE_1));
-    //printf("error cold: %.6f, error hot: %.6f\n",error(MEASURES,SE_0),error(MEASURES,SE_1));
-    //printf("Measures: %d\n",MEASURES);
 }
 
 void acc_rate_core(double epsilon){
-    double x[SIZE] = {0.0};
+    double x[N] = {0.0};
     int start = 1;
     initialize_x(x,start);
     double acc_rates[MEASURES] = {0.0};
@@ -164,34 +161,35 @@ void acc_rate_core(double epsilon){
     printf("%.1f,%.6f,%.6f\n",epsilon,mean_acc_rates,se);
 }
 
-void acc_rates(float step, int N){
+void acc_rates(float step){
     double epsilon = 0.0;
     printf("epsilon,mean,se\n");
-    for(int i = 0; i<=N; i++){
+    while (epsilon <= 1.0+step){
         acc_rate_core(epsilon);
         epsilon+=step;
     }
+    
 }
 
 void corr(){
-    double x[SIZE] = {0.0};
+    double x[N] = {0.0};
     int start = 1;
     initialize_x(x,start);
-    double corr_measures[MEASURES][SIZE] = {0.0};
-    double corr_mean[2][SIZE]= {0.0};
+    double corr_measures[MEASURES][N] = {0.0};
+    double corr_mean[2][N]= {0.0};
 
     int ind = 0;
     for(int i = 0; i < REPETITIONS; i++){
         sweep(x,epsilon);
         if (i>=TERMALIZATION && i%STEPS_TO_MEASURE==0){
-            for(int j = 0; j<SIZE; j++){
+            for(int j = 0; j<N; j++){
                 corr_measures[ind][j] = x[0]*x[j];
             }
             ind++;
         }
     }
 
-    for(int i = 0; i < SIZE; i++) {
+    for(int i = 0; i < N; i++) {
         double temp[MEASURES];
         for (int j = 0; j < MEASURES; j++) {
             temp[j] = corr_measures[j][i];
@@ -201,8 +199,8 @@ void corr(){
     }
 
     for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < SIZE; j++) {
-            printf("%f ", corr_mean[i][j]);
+        for (int j = 0; j < N; j++) {
+            printf("%f, ", corr_mean[i][j]);
         }
         printf("\n");
     }
@@ -212,7 +210,7 @@ void corr(){
 int main(){
     srand(time(NULL));
 
-    double x[SIZE];
+    double x[N];
     int start = 1; //Hot: 1, Cold: 0
     initialize_x(x,start);
     
@@ -227,7 +225,7 @@ int main(){
         if (i>=TERMALIZATION && i%STEPS_TO_MEASURE==0){
              acc_rate+=sw;
              SE[j]=S_E(x);
-             x5[j]=x[0]*x[0];
+             //x5[j]=x[0]*x[0];
              x_wlambda[j]=pow(x[5],2)+3*lambda*pow(x[5],4); 
              j++;
         }
@@ -241,8 +239,9 @@ int main(){
     
 
     //Information
-    printf("MEASURES: %d , epsilon: %0.2f , lambda: %0.2f, a: %0.2f \n",MEASURES,epsilon,lambda,a);
+    //printf("MEASURES: %d , epsilon: %0.2f , lambda: %0.2f, a: %0.2f \n",MEASURES,epsilon,lambda,a);
 
+   
     
     /*
     //Test de acción y dSE
@@ -256,8 +255,7 @@ int main(){
     //acc_rates
     /*
     float step = 0.1;
-    int N = 20;
-    acc_rates(step,N);
+    acc_rates(step);
     */
     
 
