@@ -5,8 +5,8 @@
 #include "../lib/my_math_stats.h"
 
 
-#define N 20
-double epsilon = 0.55;
+#define N 500
+double epsilon = 0.75;
 const double lambda  = 1.0;
 
 #define SIZE 10
@@ -38,12 +38,12 @@ void print_x(double x[N]){
     for (int i = 0; i < N; i++){
         
         if(i==0){
-            printf("%f,",x[i]);
+            printf("%0.1f,",x[i]);
         }
         else if(i==N-1){
-            printf("%f\n",x[i]);
+            printf("%0.1f\n",x[i]);
         }else{
-        printf("%f,",x[i]);
+        printf("%0.1f,",x[i]);
         }
         
     }
@@ -103,13 +103,21 @@ double sweep(double x[N],double epsilon){
     return acc_rate/(N);
 }
 
-void test_SE_dse(double x_0, double xp){
-    double x0[N]={0.1,0.2,0.3,0.4,0.5,x_0,0.7,0.8,0.9,1.0};
-    double x1[N]={0.1,0.2,0.3,0.4,0.5,xp,0.7,0.8,0.9,1.0};
+void test_SE_dse(){
+    double x0[N];
+    double x1[N];
+
+    for(int i =0; i<N; i++){
+        x0[i] = (float)i;
+        x1[i] = (float)i;
+    }
+
+    x1[5] = 6.0;
 
     double s0  = S_E(x0);
     double s1  = S_E(x1);
-
+    print_x(x0);
+    print_x(x1);
     printf("s0: %f\n",s0);
     printf("s1: %f\n",s1);
 
@@ -243,17 +251,15 @@ int main(){
     // printf("E_0: %f\nstderr: %f\n",mean(MEASURES,E_0),error(MEASURES,E_0));
     
     
-    corr();
+    //corr();
     //Information
-    printf("MEASURES: %d , epsilon: %0.2f , lambda: %0.2f, a: %0.2f \n",MEASURES,epsilon,lambda,a);
+   // printf("MEASURES: %d , epsilon: %0.2f , lambda: %0.2f, a: %0.2f \n",MEASURES,epsilon,lambda,a);
 
     
-    /*
-    //Test de acción y dSE
-    double x_0 = 0.6;
-    double xp = 0.7; 
-    test_SE_dse(x_0,xp);
-    */
+    
+    //Test de acción y dSE 
+    test_SE_dse();
+    
     
 
     
