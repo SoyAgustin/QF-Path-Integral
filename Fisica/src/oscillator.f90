@@ -202,8 +202,59 @@ contains
 
   end subroutine sweep
 
+  subroutine sweep2(x, n, epsilon, lambda, acc_rate)
+    implicit none
+
+    !Declarar variables
+    real(dp), intent(inout) :: x(:)
+    real(dp), intent(in) :: epsilon, lambda
+    real(dp), intent(out) :: acc_rate
+    integer, intent(in) :: n
+    real(dp) :: a, rho, ds, ds0, ds1, p, r
+    integer :: i
+    
+    if ( n == size(x) ) then
+      a = 10.0d0/real(n,dp) !L/N
+
+      acc_rate = 0.0d0
+      do i = 1, n
+
+        ds0 = S_E(x, n, lambda)
+
+        rho = random_number_real(-epsilon, epsilon)
+        x(i) = x(i) + rho
+
+        ds1 = S_E(x, n, lambda)
+        
+
+        ds = ds1 - ds0
+
+        if (ds <= 0.0d0) then
+          acc_rate = acc_rate + 1.0d0
+        else
+          p = exp(-ds)
+          r = random_number_real(0.0d0, 1.0d0)
+          if (r > p) then
+            acc_rate = acc_rate + 1.0d0
+            x(i) = x(i) - rho
+          end if
+
+        end if
+        
+      end do
+
+      acc_rate = acc_rate / real(n,dp)
+    
+    else
+      print *, "Error: La longitud de 'array' no coincide con 'n' en sweep"
+      print *, "array:",size(x)," n:",n
+      stop
+    end if
+
+  end subroutine sweep2
+
   !Subrutina para el calculo de la energia del estado base
-  subroutine ground_state(x_i, measures, lambda, energy, std_error) 
+  subroutine ground_state_calculation(x_i, measures, lambda, energy, std_error) 
     implicit none
 
     real(dp), intent(in) :: x_i(:)
@@ -212,8 +263,6 @@ contains
     real(dp), intent(out) :: energy, std_error
     real(dp), allocatable :: x2_arr(:), x4_arr(:)
     real(dp) x2_mean, x4_mean, x2_std, x4_std
-
-
 
     if ( measures == size(x_i) ) then
 
@@ -237,7 +286,7 @@ contains
       stop
     end if
 
-  end subroutine ground_state
+  end subroutine ground_state_calculation
 
 end module utils
 
@@ -285,6 +334,60 @@ subroutine acc_rates(n,start, sweeps, termalization , steps, epsilon, lambda)
   
 end subroutine acc_rates
 
+subroutine ground_state_full(n,start, sweeps, termalization , steps, epsilon, lambda)
+  use utils
+  implicit none
+
+  !Declarar variables
+  real(dp), allocatable :: x(:), acc_rate(:), x_i(:)
+  real(dp), intent(in) :: epsilon, lambda
+  integer, intent(in) :: n,start,sweeps, termalization, steps
+  real(dp) :: a, acc, mean_acc, error_acc, energy, std_error
+  integer :: i, j, measures
+
+  a = 10.0d0/real(n,dp)
+
+  measures = int( (sweeps - termalization)/steps )
+
+  allocate(x(n))
+  allocate(acc_rate(measures))
+  allocate(x_i(measures))
+  
+
+  call initialize_array(x,n,start)
+
+  j = 1
+  do i = 1, sweeps
+    call sweep2(x, n, epsilon, lambda, acc)
+
+    if (i> termalization .and. mod(i,steps) == 0) then
+
+      acc_rate(j) = acc
+      x_i(j) = x(1)
+
+      j = j + 1
+
+    end if
+
+  end do
+
+  if(j-1 /= measures) then !verificacion del tamaño del array 'acc_rate'
+    print *, "Error: La longitud de 'acc_rate' no coincide con 'measures' en acc_rate_sub"
+    print *, "measures:",measures," length of acc_rate:",j
+    stop
+  else
+    call mean_error(acc_rate, measures, mean_acc, error_acc)
+    call ground_state_calculation(x_i, measures, lambda, energy, std_error)
+    
+    write(*,'(A,F10.4,A,F10.4)') "mean: ", mean_acc, " error: ", error_acc
+    write(*,'(A,F10.4,A,F10.4)') "energy: ", energy, " error: ", std_error
+
+    deallocate(acc_rate)
+    deallocate(x_i)
+    deallocate(x)
+  end if
+  
+end subroutine ground_state_full
 
 subroutine S_E_test(n,lambda)
   use utils
@@ -335,14 +438,15 @@ program main
   integer :: n,start,sweeps,termalization, steps
   real(dp) :: epsilon, lambda
 
-  n = 10
+  n = 30
   start = 0
   sweeps = 101000
   termalization = 1000
   steps = 10
-  epsilon = 0.75d0
-  lambda = 0.0d0
-  call acc_rates(n, start, sweeps, termalization, steps, epsilon, lambda)
+  epsilon = 0.60d0
+  lambda = 1.0d0
+  call ground_state_full(n, start, sweeps, termalization, steps, epsilon, lambda)
+  
 
 
   !Test del cálculo de acción y cambio de acción
