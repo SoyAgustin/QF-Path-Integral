@@ -222,7 +222,8 @@ contains
         ds0 = S_E(x, n, lambda)
 
         rho = random_number_real(-epsilon, epsilon)
-        x(i) = x(i) + rho
+
+        x(i) = x(i) + rho !Hacemos un cambio
 
         ds1 = S_E(x, n, lambda)
         
@@ -230,13 +231,16 @@ contains
         ds = ds1 - ds0
 
         if (ds <= 0.0d0) then
-          acc_rate = acc_rate + 1.0d0
+          acc_rate = acc_rate + 1.0d0 !Se acepta el cambio
         else
           p = exp(-ds)
           r = random_number_real(0.0d0, 1.0d0)
           if (r > p) then
-            acc_rate = acc_rate + 1.0d0
-            x(i) = x(i) - rho
+             
+            x(i) = x(i) - rho!Se rechaza el cambio
+
+          else
+            acc_rate = acc_rate + 1.0d0 !Se acepta el cambio
           end if
 
         end if
@@ -415,8 +419,8 @@ subroutine S_E_test(n,lambda)
   sc1 = S_E(x2, n,lambda) - S_E(x1, n,lambda)
   sr = delta_S(x1(5),x1(6),x1(7),x2(6),n,lambda)
 
-  write(*,'(A,30F10.1)') "Array 1: ",x1
-  write(*,'(A,30F10.1)') "Array 2: ",x2
+  write(*,'(A,500F10.1)') "Array 1: ",x1
+  write(*,'(A,500F10.1)') "Array 2: ",x2
   print *, "S array 1: ",S_E(x1, n,lambda)
   print *, "S array 2: ",S_E(x2, n,lambda)
   print *, "Delta S fórmula completa: ",sc1
@@ -427,33 +431,227 @@ subroutine S_E_test(n,lambda)
 
 end subroutine S_E_test
 
+subroutine x_mean_test(n,lambda)
+  use utils
+  implicit none
+
+  !Declarar variables
+  integer, intent(in) :: n
+  real(dp), intent(in) :: lambda
+  integer :: start,sweeps,termalization, steps,measures
+  real(dp) :: epsilon, a 
+  
+
+  real(dp), allocatable :: x(:)
+  real(dp) ::  mean, error,acc, total_mean
+  integer :: i
+
+
+  start = 1 !0 = cold start, 1 = hot start
+  sweeps = 101000
+  termalization = 1000
+  steps = 10
+  measures = int( (sweeps - termalization)/steps )
+
+  
+  epsilon = 0.75d0
+  a = 10.0d0/real(n,dp)
+
+
+  total_mean = 0.0d0
+  
+  
+  allocate(x(n))
+  call initialize_array(x,n,start)
+
+  write (*,"(A,A,A)")  "mean",",", "error"
+
+
+  do i  = 1, sweeps
+
+    call sweep(x,n,epsilon, lambda, acc)
+
+    if (i> termalization .and. mod(i,steps) == 0) then
+
+    call mean_error(x, n, mean, error)
+    write (*,"(F10.5,A,F10.5)")  mean,",", error
+
+    total_mean = total_mean + mean
+   
+    end if  
+
+  end do
+
+  deallocate(x)
+
+  
+  total_mean = total_mean/real(measures,dp)
+  print *, "<x>_mean: ", total_mean
+  
+
+end subroutine x_mean_test
+
+subroutine x_i_mean_test(component,n,lambda)
+  use utils
+  implicit none
+
+  !Declarar variables
+  integer, intent(in) :: n,component
+  real(dp), intent(in) :: lambda
+  integer :: start,sweeps,termalization, steps,measures
+  real(dp) :: epsilon, a 
+  
+
+  real(dp), allocatable :: x(:), x_i(:) 
+  real(dp) ::  mean, error,acc, total_mean
+  integer :: i,j
+
+
+  start = 1 !0 = cold start, 1 = hot start
+  sweeps = 101000
+  termalization = 1000
+  steps = 10
+  measures = int( (sweeps - termalization)/steps )
+
+  
+  epsilon = 0.75d0
+  a = 10.0d0/real(n,dp)
+
+
+  total_mean = 0.0d0
+  
+  
+  allocate(x(n))
+  allocate(x_i(measures))
+  call initialize_array(x,n,start)
+
+  j=1
+  do i  = 1, sweeps
+
+    call sweep(x,n,epsilon, lambda, acc)
+
+    if (i> termalization .and. mod(i,steps) == 0) then
+
+      x_i(j) = x(component)
+      j = j + 1
+
+    end if  
+
+  end do
+
+  deallocate(x)
+
+  
+  call mean_error(x_i, measures, mean, error)
+  write(*,"(A,I0,A,F10.5,A,F10.5)") "<x_", component, "> mean: ", mean, " \pm", error
+
+end subroutine x_i_mean_test
+
+subroutine x_i_squared_mean(component,n,epsilon)
+  use utils
+  implicit none
+
+  !Declarar variables
+  integer, intent(in) :: n,component
+  real(dp), intent(in) :: epsilon
+  real(dp) :: lambda,a
+  integer :: start,sweeps,termalization, steps,measures
+  
+
+  real(dp), allocatable :: x(:), x_i(:) 
+  real(dp) ::  mean, error,acc, total_mean
+  integer :: i,j
+
+
+  start = 1 !0 = cold start, 1 = hot start
+  sweeps = 1010000
+  termalization = 10000
+  steps = 10
+  measures = int( (sweeps - termalization)/steps )
+
+
+  lambda = 0.0d0
+  a = 10.0d0/real(n,dp)
+
+  total_mean = 0.0d0
+  
+  allocate(x(n))
+  allocate(x_i(measures))
+  call initialize_array(x,n,start)
+
+  j=1
+  do i  = 1, sweeps
+
+    call sweep2(x,n,epsilon, lambda, acc)
+
+    if (i> termalization .and. mod(i,steps) == 0) then
+
+      x_i(j) = x(component)**2
+      j = j + 1
+
+    end if  
+
+  end do
+
+  deallocate(x)
+  
+  call mean_error(x_i, measures, mean, error)
+  deallocate(x_i)
+
+  write(*,"(A,I0,A,F10.5,A,F10.5)") "<x_", component, "^2> mean: ", mean, " \pm", error
+
+end subroutine x_i_squared_mean
+
 !Programa principal
 program main
   use utils
   implicit none
 
-  !Declarar variables
-
-  !Test de sweep
-  integer :: n,start,sweeps,termalization, steps
-  real(dp) :: epsilon, lambda
-
-  n = 30
-  start = 0
-  sweeps = 101000
-  termalization = 1000
-  steps = 10
-  epsilon = 0.60d0
-  lambda = 1.0d0
-  call ground_state_full(n, start, sweeps, termalization, steps, epsilon, lambda)
+  !Energia del estado base para lambda 0 <x_i^2> 
+  real(dp) :: epsilon
+  integer :: component,n,i
   
+  n = 20
+  epsilon = 0.6d0
+  component  = 1
+  !do component = 1, n
 
+    call x_i_squared_mean(component, n, epsilon)
 
-  !Test del cálculo de acción y cambio de acción
+  !end do
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  ! !Test del promedio de la i-esima componente <x_i>(debe ser 0)
+  ! real(dp) :: lambda
+  ! integer :: component,n,i
+  
+  ! n = 10
+
+  ! do component = 1, n
+
+  !   lambda = 0.0
+  !   call x_i_mean_test(component, n, lambda)
+
+  ! end do
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
+  ! !Test del promedio de la trayectoria completa: <x> (debe ser 0)
   ! real(dp) :: lambda
   ! integer :: n
 
-  ! n = 500
+  ! n = 100
+  ! lambda = 0.0
+  ! call x_mean_test(n,lambda)
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  ! !Test del cálculo de acción y cambio de acción
+  ! real(dp) :: lambda
+  ! integer :: n
+
+  ! n = 100
   ! lambda = 1.0
   ! call S_E_test(n,lambda)
+
 end program main
