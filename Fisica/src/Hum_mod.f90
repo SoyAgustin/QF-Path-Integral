@@ -1,54 +1,100 @@
 program metrooscilador
 
-real , allocatable :: x(:),xi_squared_arr(:),xi_quart_arr(:)
+real , allocatable :: x(:),xi_squared_arr(:),xi_quart_arr(:), E_array(:), corrMatrix(:,:), corrMatrix_temp(:), corrMatrix_mean(:,:)
 real :: a,epsilon,rand,extrand,SE,SE1,rho,deltaSE,prob
-integer :: i,j,acc,measures_cont,n,sweeps,measures,steps
-real :: final_xi_squared,lambda
-real :: final_xi_quart
+integer :: i,j,k,d,acc,measures_cont,n,sweeps,measures,steps
+real :: lambda, E_mean, E_error, corr_mean_temp, corr_error_temp
+real :: acc_rate
+integer :: n_arr(8)
+real :: epsilon_arr(8)
 
-n = 20
-lambda=0
-epsilon = 0.6
-a = 10.0/real(n)
+n_arr = (/10, 20, 30, 40, 50, 70, 100, 150/)
+epsilon_arr = (/0.75, 0.65, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25/)!lambda = 0
+!epsilon_arr = (/0.65, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25/) !lambda = 0.5
+!epsilon_arr = (/0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25/) !lambda = 1
 
-acc=0
-measures_cont=1
+!write(*,*) "E_0, err, acc_rate"
+write(*,*) "corr, err"
+
+!do k = 1, 8 
+
+	!n = n_arr(k)
+	!epsilon = epsilon_arr(k)
+	n = 40
+	epsilon = 0.45
+	lambda=1.0
+	
+	a = 10.0/real(n)
+
+	acc=0
+	measures_cont=1
+
+	sweeps = 1010000
+	termalization = 10000
+	steps = 10
+	measures = int( (sweeps - termalization)/steps )
+
+	allocate(x(n))
+	!allocate(xi_squared_arr(measures))
+	!allocate(xi_quart_arr(measures))
+	allocate(corrMatrix(n,measures))
+	allocate(corrMatrix_temp(measures))
+	allocate(corrMatrix_mean(n,2))
 
 
-sweeps = 1010000
-termalization = 10000
-steps = 10
-measures = int( (sweeps - termalization)/steps )
+	!Hot start
+	do i=1,n
+		call Random_Number(rand)
+		extrand=2*rand-1
+		x(i)=extrand
+	end do
 
-allocate(x(n))
-allocate(xi_squared_arr(measures))
-allocate(xi_quart_arr(measures))
+	do i=1, sweeps
 
-do i=1,n
-	call Random_Number(rand)
-	extrand=2*rand-1
-	x(i)=extrand
-end do
+		call sweeep(x)
 
-do i=1, sweeps
+		if(i .ge. termalization .and. mod(i,steps) .eq. 0) then
+			
+			!xi_squared_arr(measures_cont)=x(1) ** 2
+			!xi_quart_arr(measures_cont)=x(1)**4
 
-	call sweeep(x)
+			do d = 1,n
+				corrMatrix(d,measures_cont) = x(1) * x(d)
+			end do
 
-	if(i .ge. termalization .and. mod(i,steps) .eq. 0) then
+			measures_cont=measures_cont+1
 		
-		xi_squared_arr(measures_cont)=x(1) ** 2
-		xi_quart_arr(measures_cont)=x(1)**4
-		measures_cont=measures_cont+1
-	
-	end if
-	
-end do
+		end if
+		
+	end do
 
-final_xi_squared=mean(xi_squared_arr,(measures_cont-1))
-final_xi_quart=mean(xi_quart_arr,(measures_cont-1))
+	do i = 1,n
 
-write(*,*) 'acc_rate: ', acc /(real(n)*sweeps)
-write(*,*) 'E_0', final_xi_squared+3.*lambda*final_xi_quart
+		corrMatrix_temp = corrMatrix(i,:)
+		call mean_error(corrMatrix_temp, measures, corr_mean_temp, corr_error_temp)
+		corrMatrix_mean(i,1) = corr_mean_temp
+		corrMatrix_mean(i,2) = corr_error_temp
+
+	end do 
+	!E_array = xi_squared_arr + 3.*lambda*xi_quart_arr
+	!deallocate(xi_squared_arr)
+	!deallocate(xi_quart_arr)
+	deallocate(corrMatrix_temp)
+	deallocate(corrMatrix)
+
+	!call mean_error(E_array, measures,E_mean,E_error)
+
+	!acc_rate = acc /(real(n)*sweeps)
+	do i = 1, n
+		write(*,"(F10.5,A,F10.5)") corrMatrix_mean(i,1),",", corrMatrix_mean(i,2)
+	end do
+
+	write(*,"(F10.5,A,F10.5)") corrMatrix_mean(1,1),",", corrMatrix_mean(1,2)
+	!write(*,"(F10.5,A,F10.5,A,F10.5)") E_mean,",", E_error,",", acc_rate
+	deallocate(x)
+	deallocate(corrMatrix_mean)
+
+!end do 
 
 
 contains
@@ -215,5 +261,45 @@ function prom_squared(arreglo,longitud) result(average)
 
 
 end function prom_squared
+
+  !Subrutina para calcular el promedio y error estándar de un arreglo
+subroutine mean_error(array, n, mean, std_err)
+    implicit none
+    real, intent(in) :: array(:)
+    integer, intent(in) :: n
+    real, intent(out) :: mean, std_err
+    real :: suma, suma_cuadrados, var
+    integer :: i
+
+    if (n  == size(array)) then 
+
+      ! Inicializar variables
+      suma = 0.0
+      suma_cuadrados = 0.0
+      mean = 0.0
+      std_err = 0.0
+
+      ! Calcular el promedio
+      do i = 1, n
+          suma = suma + array(i)
+      end do
+      mean = suma / real(n)
+
+      ! Calcular la varianza
+      do i = 1, n
+          suma_cuadrados = suma_cuadrados + (array(i) - mean)**2
+      end do
+      var = suma_cuadrados / real(n - 1)
+
+      ! Calcular el error estándar
+      std_err = sqrt(var / real(n))
+
+    else
+      print *, "Error: La longitud de 'array' no coincide con 'n' en mean_error."
+      print *, "array:",size(array)," n:",n
+      stop
+    end if
+
+  end subroutine mean_error
 
 end
