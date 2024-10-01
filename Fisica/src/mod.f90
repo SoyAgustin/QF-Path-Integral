@@ -11,16 +11,18 @@ real(dp) :: epsilon_arr(9)
 
 
 n_arr = (/10, 20, 30, 40, 50, 70, 100, 150,200/)
-!epsilon_arr = (/0.75, 0.65, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25,0.2/) !lambda = 0
+epsilon_arr = (/0.75, 0.65, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25,0.2/) !lambda = 0
 !epsilon_arr = (/0.65, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25,0.2/) !lambda = 0.5
-epsilon_arr = (/0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25,0.2/) !lambda = 1
+!epsilon_arr = (/0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25,0.2/) !lambda = 1
 
 write(*,*) "E_0, err, acc_rate"
 
-do k = 1, 9
+do k = 1, 7
 
 	n = n_arr(k)
 	epsilon = real(epsilon_arr(k),dp)
+	!n = 100
+	!epsilon = 0.35
 	
 	lambda = 0.0d0
 	
@@ -28,15 +30,18 @@ do k = 1, 9
 
 	acc=0
 	E_cont = 0.0d0
+	E_cont_2 = 0.0d0
+	E_error = 0.0d0
+
 	measures_cont=1
 
-	sweeps = 5010000
-	termalization = 10000
-	steps = 10
+	sweeps = 100000000
+	termalization = 100000
+	steps = 1000
 	measures = int( (sweeps - termalization)/steps )
 
 	allocate(x(n))
-	allocate(E_array(measures))
+	!allocate(E_array(measures))
 	
 	!Hot start
 	do i=1,n
@@ -51,26 +56,29 @@ do k = 1, 9
 
 		if(i .ge. termalization .and. mod(i,steps) .eq. 0) then
 
-			E_array(measures_cont) = x(1)**2.0d0 + 3.0d0 * lambda * x(1)**4.0d0
-			!E_cont = E_cont + x(1)**2.0d0 + 3.0d0 * lambda * x(1)**4.0d0
-			!E_cont_2 = E_cont_2 + E_cont**2.0d0
+			!!E_array(measures_cont) = x(1)**2.0d0 + 3.0d0 * lambda * x(1)**4.0d0
+			E_cont = E_cont + x(1)**2.0d0 + 3.0d0 * lambda * x(1)**4.0d0
+			E_cont_2 = E_cont_2 + (x(1)**2.0d0 + 3.0d0 * lambda * x(1)**4.0d0)**2.0d0
 
+			!print *, x(1)**2.0d0 + 3.0d0 * lambda * x(1)**4.0d0
+			
+			
 			measures_cont=measures_cont+1
 		
 		end if
 		
 	end do
 
-	!M = measures_cont
-	call mean_error(E_array, measures,E_mean,E_error)
-	deallocate(E_array)
+	 M = measures_cont
+	!call mean_error(E_array, measures,E_mean,E_error)
+	!deallocate(E_array)
 
 	acc_rate = acc /(real(n,dp)*sweeps)
 
-	!E_mean = E_cont / M
+	E_mean = E_cont / M
 
-	!E_error = (E_cont_2 - M*(E_mean**2.0d0))/(M-1.0d0)
-	!E_error = sqrt(E_error/M)
+	E_error = (E_cont_2 - M*(E_mean)**2.0d0)/(M-1.0d0)
+	E_error = sqrt(E_error/(M))
 
 	write(*,"(F10.5,A,F10.5,A,F10.5)") E_mean,",", E_error,",", acc_rate
 	deallocate(x)
